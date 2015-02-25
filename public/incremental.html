@@ -1,0 +1,246 @@
+<html>
+<head>
+    <title>Incremental</title>
+    <script type="text/javascript">
+        $ = document.getElementById.bind(document);
+        $$ = document.querySelectorAll.bind(document);
+        function request(url, options) {
+            options = options || {};
+            var xhr = new XMLHttpRequest();
+            // standard arguments get treated specially. here are their default values:
+            var args = {
+                method: 'GET',
+                async: true,
+                body: null,
+                headers: {}
+            };
+            // any additional options get set directly on xhr.
+            // this allows the calling function to specify arbitrary parameters such as 'onload'.
+            for (var i in options) {
+                if (i in args) {
+                    args[i] = options[i];
+                }
+                else {
+                    xhr[i] = options[i];
+                }
+            }
+            // serialize body as JSON unless it is a string
+            // TODO: support application/x-www-form-urlencoded
+            if (args.body && typeof args.body !== 'string') {
+                args.body = JSON.stringify(args.body);
+                args.headers['Content-Type'] = 'application/json';
+            }
+            xhr.open(args.method, url, args.async);
+            for (var name in args.headers) {
+                var value = args.headers[name];
+                xhr.setRequestHeader(name, value);
+            }
+            xhr.send(args.body);
+            return xhr;
+        }
+        function serializeQuery(obj) {
+            var pairs = [];
+            for (var key in obj) {
+                var value = obj[key];
+                pairs.push(encodeURIComponent(key)+'='+encodeURIComponent(value));
+            }
+            return pairs.join('&').replace(/%20/g, '+')
+        }
+        function setText(field, value) {
+            var props = ['value', 'textContent', 'innerText'];
+            for (var i in props) {
+                var prop = props[i];
+                if (prop in field) {
+                    field[prop] = value;
+                    return
+                }
+            }
+        }
+        function render(template, context) {
+            var container = document.createElement('div');
+            var templateText = template.innerHTML || template;
+            container.innerHTML = templateText.trim();
+            var el = container.firstChild;
+            for (var key in context) {
+                var value = context[key];
+                var selector = '[name="'+key+'"]';
+                var fields = el.querySelectorAll(selector);
+                for (var i = 0; i < fields.length; i++) {
+                    var field = fields[i];
+                    setText(field, value);
+                }
+            }
+            return el;
+        }
+    </script>
+    <script type="text/html" id="term-template">
+        <span class="term">
+            <span name="coefficient"></span><var name="variable"></var><sup name="exponent"></sup>
+        </span>
+    </script>
+</head>
+<body>
+    <div style="position:fixed; top:0.5em; right:0.5em;">
+        <span id="fps"></span> FPS
+    </div>
+    <p style="display:none;">
+        Total frames: <span id="totalFrames"></span>
+    </p>
+    <p>
+        Time on this page: <span id="timeOnPage">0</span> sec
+    </p>
+    <p>
+        Clock skew: <span id="serverTime"></span> msec
+        <button onclick="updateClockSkew()">update</button>
+    </p>
+    <p>
+        Time since last click: <var>t</var> = <span id="timeSinceClick"></span> sec
+        <button id="clickMe">click</button>
+    </p>
+    <p>
+        Formula: <var>f</var>(<var>t</var>) = <span id="formula"></span>
+        <button id="randomize-formula">randomize</button>
+    </p>
+    <p>
+        Value of formula: <span id="formula-value"></span>
+    </p>
+    <script>
+        var clickTime = window.localStorage.getItem('clickTime') || Date.now();
+        $('clickMe').onclick = function(){
+            var now = Date.now();
+            var serverNow = now - skew;
+            // actually, we want to make sure skew is valid before using it
+            clickTime = serverNow;
+            window.localStorage.setItem('clickTime', clickTime);
+        }
+
+        var $timeOnPage = $('timeOnPage');
+        var $fps = $('fps');
+        var $totalFrames = $('totalFrames');
+        var $timeSinceClick = $('timeSinceClick');
+        var $formulaValue = $('formula-value');
+        var startTime = new Date();
+        var lastFrame = startTime;
+        var frameCount = 0;
+        var totalFrames = 0;
+        var fps_n = 12;
+        function tick() {
+            var now = Date.now();
+            setText($timeOnPage, ((now - startTime)/100 | 0)/10);
+
+            frameCount = (frameCount + 1) % fps_n
+            if (frameCount == 0) {
+                var msecForNFrames = now - lastFrame;
+                lastFrame = now;
+                var fps = fps_n * 1000 / msecForNFrames;
+                setText($fps, fps|0);
+
+                // TODO: calculate this each frame based on requested fps
+                if (Math.abs(msecForNFrames) > 200*fps_n) {
+                    console.log('detected clock jump. reloading time from server.');
+                    updateClockSkew();
+                }
+            }
+
+            setText($totalFrames, ++totalFrames);
+
+            var msecSinceClick = (now - clickTime - skew)
+            setText($timeSinceClick, (msecSinceClick/100|0)/10);
+
+            var value = evaluateFormula(polynomial, msecSinceClick/1000);
+            setText($formulaValue, Math.floor(value));
+
+            // requestAnimationFrame(tick);
+        }
+        // todo: specify this interval from data
+        setInterval(function(){
+            requestAnimationFrame(tick);
+        }, 125);
+
+        var skew = null;
+        function updateClockSkew() {
+            skew = null;
+            var clientTime = Date.now();
+            request(document.location, {
+                method: 'HEAD',
+                headers: {'Cache-Control': 'no-cache'},
+                onload: function(){
+                    if (skew != null || this.status == 0) {
+                        return
+                    }
+                    var serverTime = new Date(this.getResponseHeader('date'));
+                    skew = (Date.now()+clientTime)/2 - serverTime;
+                    setText($('serverTime'), skew);
+                }
+            });
+        };
+        updateClockSkew();
+
+        function displayFormula(coefficients, variable) {
+            var $formula = $('formula');
+            termTemplate = $('term-template').innerHTML;
+
+            $formula.innerHTML = '';
+            terms = [];
+            for (var exp = coefficients.length-1; exp >= 0; exp--) {
+                var k = coefficients[exp];
+                var context = {};
+                if (k == 0) {
+                    continue;
+                }
+                if (k != 1 || exp == 0) {
+                    context.coefficient = k;
+                }
+                if (exp> 0) {
+                    context.variable = variable || 't';
+                }
+                if (exp> 1) {
+                    context.exponent = exp;
+                }
+                var $term = render(termTemplate, context);
+                terms.push($term);
+            }
+            if (terms.length == 0) {
+                terms.push(render('0'));
+            }
+            for (var i = 0; i < terms.length; i++) {
+                var $term = terms[i];
+                if (i > 0) {
+                    $formula.appendChild(render('+'));
+                }
+                $formula.appendChild($term);
+            }
+        }
+        var polynomial = [];
+        function randomizeFormula() {
+            polynomial = [];
+            for (var i = 0; i < 3; i++) {
+                polynomial[i] = Math.random()*10|0;
+            }
+            displayFormula(polynomial);
+        }
+        $('randomize-formula').onclick = randomizeFormula;
+        randomizeFormula();
+
+        function evaluateFormula(coefficients, x) {
+            var accum = 0;
+            var x_to_exp = 1;
+            for (var exp = 0; exp < coefficients.length; exp++) {
+                var k = coefficients[exp];
+                accum += k * x_to_exp;
+                x_to_exp *= x;
+            }
+            return accum;
+        }
+
+        // todo: build affine formula from user input
+        // general form is f(t) = m*t + b
+        //                 where t = t_now - t_0
+        // start with m=0, b=0
+        // click one button to increment b
+        // click another button to increment m:
+        //     set b to f(t)
+        //     set m to m+1
+        //     set t0 to Date.now()
+    </script>
+</body>
