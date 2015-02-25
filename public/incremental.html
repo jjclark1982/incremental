@@ -265,6 +265,13 @@
         //     set b to f(t)
         //     set m to m+1
         //     set t0 to Date.now()
+        //
+        // TODO: determine whether this method can accommodate higher-order polynomials
+        // f(t) = a * t^2 + b * t + c
+        // f(t-t_0) = a*(t-t_0)^2 + b*(t-t_0) + c
+        //          = a*(t^2 - 2*t_0*t + t_0^2) + b*t - b*t_0 + c
+        //          = a*t^2 - (2*a*t_0 + b)*t + a*t_0^2 - b*t_0 + c
+        // is t_0^2 meaningful?
         accumulator_t0 = startTime;
         accumulatorPoly = [];
         try {
