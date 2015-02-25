@@ -12,11 +12,8 @@
   "dependencies": {
     "browser-sync": "^2.2.1",
     "coffee-script": "^1.9.1",
-    "connect-livereload": "^0.5.3",
-    "express": "^4.12.0",
     "gulp": "^3.8.11",
     "gulp-load-plugins": "^0.8.0",
-    "gulp-util": "^3.0.4",
-    "morgan": "^1.5.1"
+    "gulp-util": "^3.0.4"
   }
 }

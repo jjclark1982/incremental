@@ -1,7 +1,12 @@
 <html>
 <head>
     <title>Incremental</title>
-    <script type="text/javascript">
+    <style>
+    sup,sub {
+        font-size: 60%;
+    }
+    </style>
+    <script type="text/javascript" id="util">
         $ = document.getElementById.bind(document);
         $$ = document.querySelectorAll.bind(document);
         function request(url, options) {
@@ -93,16 +98,27 @@
         Clock skew: <span id="serverTime"></span> msec
         <button onclick="updateClockSkew()">update</button>
     </p>
-    <p>
+    <p style="display: none;">
         Time since last click: <var>t</var> = <span id="timeSinceClick"></span> sec
         <button id="clickMe">click</button>
-    </p>
-    <p>
         Formula: <var>f</var>(<var>t</var>) = <span id="formula"></span>
         <button id="randomize-formula">randomize</button>
+        <br>
+        Value of formula: <span id="formula-value"></span>
+    </p>
+    <p style="line-height: 20px;">
+        Accumulator start: <var>t<sub>0</sub></var> = <span id="accumulator-t0"></span>
+        <br>
+        Accumulator offset: <var>t</var> = <span id="accumulator-t"></span> sec
+        <br>
+        Accumulator formula: <var>f</var>(<var>t</var>) = <span id="accumulator-formula">0</span>
+        <br>
+        Accumulator value: <span id="accumulator"></span>
     </p>
     <p>
-        Value of formula: <span id="formula-value"></span>
+        <button id="add-one-per-second">Add 1 per second</button>
+        <button id="add-one">Add 1</button>
+        <button id="reset-accumulator">Reset</button>
     </p>
     <script>
         var clickTime = window.localStorage.getItem('clickTime') || Date.now();
@@ -119,43 +135,51 @@
         var $totalFrames = $('totalFrames');
         var $timeSinceClick = $('timeSinceClick');
         var $formulaValue = $('formula-value');
-        var startTime = new Date();
+        var startTime = Date.now();
         var lastFrame = startTime;
         var frameCount = 0;
         var totalFrames = 0;
-        var fps_n = 12;
+        var targetFPS = 12;
+        var msecPerFrame = 1000/targetFPS;
         function tick() {
             var now = Date.now();
-            setText($timeOnPage, ((now - startTime)/100 | 0)/10);
+            setText($timeOnPage, Math.floor((now - startTime)/1000));
+            setText($totalFrames, ++totalFrames);
 
-            frameCount = (frameCount + 1) % fps_n
-            if (frameCount == 0) {
-                var msecForNFrames = now - lastFrame;
-                lastFrame = now;
-                var fps = fps_n * 1000 / msecForNFrames;
-                setText($fps, fps|0);
+            var msecForThisFrame = now - lastFrame;
+            lastFrame = now;
 
-                // TODO: calculate this each frame based on requested fps
-                if (Math.abs(msecForNFrames) > 200*fps_n) {
-                    console.log('detected clock jump. reloading time from server.');
-                    updateClockSkew();
-                }
+            msecPerFrame = (0.1 * msecForThisFrame) + (0.9 * msecPerFrame);
+            setText($fps, Math.round(1000 / msecPerFrame));
+
+            if (Math.abs(msecForThisFrame) > 1000/targetFPS + 100) {
+                console.log('detected clock jump. reloading time from server.', msecForThisFrame);
+                updateClockSkew();
             }
 
-            setText($totalFrames, ++totalFrames);
 
             var msecSinceClick = (now - clickTime - skew)
             setText($timeSinceClick, (msecSinceClick/100|0)/10);
 
-            var value = evaluateFormula(polynomial, msecSinceClick/1000);
+            var value = evaluatePolynomial(polynomial, msecSinceClick/1000);
             setText($formulaValue, Math.floor(value));
 
+            var accum_t = (now - accumulator_t0 - skew)/1000;
+            var accum_value = evaluatePolynomial(accumulatorPoly, accum_t);
+            setText($('accumulator-t'), accum_t);
+            setText($('accumulator'), Math.floor(accum_value));
             // requestAnimationFrame(tick);
         }
-        // todo: specify this interval from data
-        setInterval(function(){
-            requestAnimationFrame(tick);
-        }, 125);
+
+        var displayInterval = null;
+        function setFPS(fps) {
+            targetFPS = fps;
+            clearInterval(displayInterval);
+            displayInterval = setInterval(function(){
+                requestAnimationFrame(tick);
+            }, 1000/fps);
+        }
+        setFPS(targetFPS);
 
         var skew = null;
         function updateClockSkew() {
@@ -176,16 +200,15 @@
         };
         updateClockSkew();
 
-        function displayFormula(coefficients, variable) {
-            var $formula = $('formula');
+        function displayPolynomial(coefficients, el, variable) {
             termTemplate = $('term-template').innerHTML;
 
-            $formula.innerHTML = '';
+            el.innerHTML = '';
             terms = [];
             for (var exp = coefficients.length-1; exp >= 0; exp--) {
                 var k = coefficients[exp];
                 var context = {};
-                if (k == 0) {
+                if (!k) {
                     continue;
                 }
                 if (k != 1 || exp == 0) {
@@ -206,9 +229,9 @@
             for (var i = 0; i < terms.length; i++) {
                 var $term = terms[i];
                 if (i > 0) {
-                    $formula.appendChild(render('+'));
+                    el.appendChild(render('+'));
                 }
-                $formula.appendChild($term);
+                el.appendChild($term);
             }
         }
         var polynomial = [];
@@ -217,23 +240,23 @@
             for (var i = 0; i < 3; i++) {
                 polynomial[i] = Math.random()*10|0;
             }
-            displayFormula(polynomial);
+            displayPolynomial(polynomial, $('formula'));
         }
         $('randomize-formula').onclick = randomizeFormula;
         randomizeFormula();
 
-        function evaluateFormula(coefficients, x) {
+        function evaluatePolynomial(coefficients, x) {
             var accum = 0;
             var x_to_exp = 1;
             for (var exp = 0; exp < coefficients.length; exp++) {
-                var k = coefficients[exp];
+                var k = coefficients[exp] || 0;
                 accum += k * x_to_exp;
                 x_to_exp *= x;
             }
             return accum;
         }
 
-        // todo: build affine formula from user input
+        // affine formula from user input
         // general form is f(t) = m*t + b
         //                 where t = t_now - t_0
         // start with m=0, b=0
@@ -242,5 +265,38 @@
         //     set b to f(t)
         //     set m to m+1
         //     set t0 to Date.now()
+        accumulator_t0 = startTime;
+        accumulatorPoly = [];
+        try {
+            accumulator_t0 = parseInt(localStorage.getItem('accumulator_t0')) || startTime;
+            accumulatorPoly = JSON.parse(localStorage.getItem('accumulatorPoly') || []);
+        }
+        catch (e) {}
+        function updateAccumulator() {
+            localStorage.setItem('accumulator_t0', accumulator_t0);
+            localStorage.setItem('accumulatorPoly', JSON.stringify(accumulatorPoly));
+            displayPolynomial(accumulatorPoly, $('accumulator-formula'));
+            setText($('accumulator-t0'), new Date(accumulator_t0));
+        }
+        updateAccumulator();
+        $("add-one").onclick = function() {
+            accumulatorPoly[0] = (accumulatorPoly[0] || 0) + 1;
+            updateAccumulator();
+        };
+        $("add-one-per-second").onclick = function() {
+            // TODO: delay this calculation if skew is not currently valid
+            var t1 = Date.now() - skew;
+            var t = (t1 - accumulator_t0)/1000;
+            var currentValue = evaluatePolynomial(accumulatorPoly, t);
+            accumulatorPoly[0] = currentValue;
+            accumulator_t0 = t1;
+            accumulatorPoly[1] = (accumulatorPoly[1] || 0) + 1;
+            updateAccumulator();
+        };
+        $("reset-accumulator").onclick = function() {
+            accumulatorPoly = [];
+            updateAccumulator();
+        };
+
     </script>
 </body>
