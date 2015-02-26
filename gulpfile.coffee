@@ -11,7 +11,7 @@ gulp.task('server', (ready)->
         server: {
             baseDir: __dirname+'/public'
         }
-        files: __dirname+'/public/**'
+        files: __dirname+'/public/**/*'
         online: false
         open: false
         notify: false
