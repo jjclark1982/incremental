@@ -113,7 +113,7 @@
         <br>
         Accumulator formula: <var>f</var>(<var>t</var>) = <span id="accumulator-formula">0</span>
         <br>
-        Accumulator value: <span id="accumulator"></span>
+        Accumulator value: <span id="accumulator-value"></span>
     </p>
     <p>
         <button id="add-one-per-second">Add 1 per second</button>
@@ -164,10 +164,10 @@
             var value = evaluatePolynomial(polynomial, msecSinceClick/1000);
             setText($formulaValue, Math.floor(value));
 
-            var accum_t = (now - accumulator_t0 - skew)/1000;
-            var accum_value = evaluatePolynomial(accumulatorPoly, accum_t);
+            var accum_t = (now - accumulator.t_0 - skew)/1000;
+            var accum_value = evaluatePolynomial(accumulator.poly, accum_t);
             setText($('accumulator-t'), accum_t);
-            setText($('accumulator'), Math.floor(accum_value));
+            setText($('accumulator-value'), Math.floor(accum_value));
             // requestAnimationFrame(tick);
         }
 
@@ -272,36 +272,49 @@
         //          = a*(t^2 - 2*t_0*t + t_0^2) + b*t - b*t_0 + c
         //          = a*t^2 - (2*a*t_0 + b)*t + a*t_0^2 - b*t_0 + c
         // is t_0^2 meaningful?
-        accumulator_t0 = startTime;
-        accumulatorPoly = [];
+
+        // general-purpose function to translate a polynomial from t_0 to t_1
+        function translateAccum(accum, t_1) {
+            var newPoly = [];
+            for (var i = 0; i < accum.poly.length; i++) {
+                newPoly[i] = accum.poly[i];
+            }
+            var t = (t_1-accum.t_0)/1000;
+            newPoly[0] = evaluatePolynomial(accum.poly, t);
+            return {
+                t_0: t_1,
+                poly: newPoly
+            }
+        };
+        var accumulator;
         try {
-            accumulator_t0 = parseInt(localStorage.getItem('accumulator_t0')) || startTime;
-            accumulatorPoly = JSON.parse(localStorage.getItem('accumulatorPoly') || []);
+            accumulator = JSON.parse(localStorage.getItem('accumulator'));
         }
         catch (e) {}
+        accumulator = accumulator || {
+            t_0: startTime,
+            poly: []
+        };
         function updateAccumulator() {
-            localStorage.setItem('accumulator_t0', accumulator_t0);
-            localStorage.setItem('accumulatorPoly', JSON.stringify(accumulatorPoly));
-            displayPolynomial(accumulatorPoly, $('accumulator-formula'));
-            setText($('accumulator-t0'), new Date(accumulator_t0));
+            localStorage.setItem('accumulator', JSON.stringify(accumulator));
+            displayPolynomial(accumulator.poly, $('accumulator-formula'));
+            setText($('accumulator-t0'), new Date(accumulator.t_0));
         }
         updateAccumulator();
         $("add-one").onclick = function() {
-            accumulatorPoly[0] = (accumulatorPoly[0] || 0) + 1;
+            accumulator.poly[0] = (accumulator.poly[0] || 0) + 1;
             updateAccumulator();
         };
         $("add-one-per-second").onclick = function() {
             // TODO: delay this calculation if skew is not currently valid
-            var t1 = Date.now() - skew;
-            var t = (t1 - accumulator_t0)/1000;
-            var currentValue = evaluatePolynomial(accumulatorPoly, t);
-            accumulatorPoly[0] = currentValue;
-            accumulator_t0 = t1;
-            accumulatorPoly[1] = (accumulatorPoly[1] || 0) + 1;
+            var t_1 = Date.now() - skew;
+            accumulator = translateAccum(accumulator, t_1);
+            accumulator.poly[1] = (accumulator.poly[1] || 0) + 1;
             updateAccumulator();
         };
         $("reset-accumulator").onclick = function() {
-            accumulatorPoly = [];
+            accumulator.t_0 = Date.now() - skew;
+            accumulator.poly = [];
             updateAccumulator();
         };
 
