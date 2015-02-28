@@ -113,7 +113,9 @@
         <br>
         Accumulator formula: <var>f</var>(<var>t</var>) = <span id="accumulator-formula">0</span>
         <br>
-        Accumulator value: <span id="accumulator-value"></span>
+        Continuous value: <span id="accumulator-value"></span>
+        <br>
+        Discrete value: <span id="accumulator-value-discrete"></span>
     </p>
     <p>
         <button id="add-one-per-second">Add 1 per second</button>
@@ -166,9 +168,10 @@
 
             var accum_t = (now - accumulator.t_0 - skew)/1000;
             var accum_value = evaluatePolynomial(accumulator.poly, accum_t);
+            var accum_value_d = evaluateDiscretePolynomial(accumulator.poly, accum_t);
             setText($('accumulator-t'), accum_t);
             setText($('accumulator-value'), Math.floor(accum_value));
-            // requestAnimationFrame(tick);
+            setText($('accumulator-value-discrete'), Math.floor(accum_value_d));
         }
 
         var displayInterval = null;
@@ -249,11 +252,26 @@
             var accum = 0;
             var x_to_exp = 1;
             for (var exp = 0; exp < coefficients.length; exp++) {
-                var k = coefficients[exp] || 0;
-                accum += k * x_to_exp;
+                var k_i = coefficients[exp] || 0;
+                accum += k_i * x_to_exp;
                 x_to_exp *= x;
             }
             return accum;
+        }
+
+        // number of widgets at time t = edp(poly, t, 0)
+        // number of widget factories at time t = edp(poly, t, 1)
+        // number of manually-bought factories = poly[1]
+        // TODO: do these equivalences still hold after translation?
+        function evaluateDiscretePolynomial(k, x, i) {
+            i = i || 0;
+            if (i >= k.length) {
+                return 0;
+            }
+            var j = i + 1;
+            var k_j = evaluateDiscretePolynomial(k, x, j);
+            var k_i = k[i] + k_j*x;
+            return Math.floor(k_i);
         }
 
         // affine formula from user input
