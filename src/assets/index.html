@@ -2,8 +2,9 @@
 <head>
     <title>Incremental</title>
     <style>
-        sup,sub {
-            font-size: 60%;
+        body {
+            padding: 1em;
+            font-family: serif;
         }
     </style>
     <script type="text/javascript" id="util">
@@ -80,11 +81,6 @@
             }
             return el;
         }
-    </script>
-    <script type="text/html" id="term-template">
-        <span class="term">
-            <span name="coefficient"></span><var name="variable"></var><sup name="exponent"></sup>
-        </span>
     </script>
 </head>
 <body>
@@ -210,40 +206,6 @@
         };
         updateClockSkew();
 
-        function displayPolynomial(coefficients, el, variable) {
-            termTemplate = $('term-template').innerHTML;
-
-            el.innerHTML = '';
-            terms = [];
-            for (var exp = coefficients.length-1; exp >= 0; exp--) {
-                var k = coefficients[exp];
-                var context = {};
-                if (!k) {
-                    continue;
-                }
-                if (k != 1 || exp == 0) {
-                    context.coefficient = k;
-                }
-                if (exp> 0) {
-                    context.variable = variable || 't';
-                }
-                if (exp> 1) {
-                    context.exponent = exp;
-                }
-                var $term = render(termTemplate, context);
-                terms.push($term);
-            }
-            if (terms.length == 0) {
-                terms.push(render('0'));
-            }
-            for (var i = 0; i < terms.length; i++) {
-                var $term = terms[i];
-                if (i > 0) {
-                    el.appendChild(render('+'));
-                }
-                el.appendChild($term);
-            }
-        }
         var polynomial = [];
         function randomizeFormula() {
             polynomial = [];
@@ -375,5 +337,6 @@
         };
 
     </script>
+    <div id="content"></div>
     <script src="/bundle.js"></script>
 </body>
