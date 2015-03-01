@@ -170,8 +170,8 @@
             setText($formulaValue, Math.floor(value));
 
             var accum_t = (now - accumulator.t_0 - skew)/1000;
-            var accum_value = evaluatePolynomial(accumulator.poly, accum_t);
-            var accum_value_d = evaluateDiscretePolynomial(accumulator.poly, accum_t);
+            var accum_value = evaluatePolynomial(accumulator.k, accum_t);
+            var accum_value_d = accumulator.evaluate(accum_t);
             setText($('accumulator-t'), accum_t);
             setText($('accumulator-value'), Math.floor(accum_value));
             setText($('accumulator-value-discrete'), Math.floor(accum_value_d));
@@ -201,6 +201,7 @@
                         return
                     }
                     var serverTime = new Date(this.getResponseHeader('date'));
+                    // I don't think we have a way to tell how much time elapsed while the server was preparing the response.
                     skew = (Date.now()+clientTime)/2 - serverTime;
                     setText($('serverTime'), skew);
                     callback();
@@ -265,92 +266,107 @@
             return accum;
         }
 
+        function Accumulator(properties) {
+            this.trustClientClock = false;
+            this.discrete = true;
+            this.batched = false;
+            this.scale = 1000;
+            this.t_0 = Date.now();
+            this.k = [];
+            for (var i in properties) {
+                this[i] = properties[i];
+            }
+        }
+
         // number of widgets at time t = edp(poly, t, 0)
         // number of widget factories at time t = edp(poly, t, 1)
         // number of manually-bought factories = poly[1]
         // TODO: do these equivalences still hold after translation?
-        function evaluateDiscretePolynomial(k, x, i) {
+        Accumulator.prototype.evaluate = function(x, i) {
             i = i || 0;
-            if (i >= k.length) {
+            if (i >= this.k.length) {
                 return 0;
             }
+            if (this.batched) {
+                x = Math.floor(x);
+            }
             var j = i + 1;
-            var k_j = evaluateDiscretePolynomial(k, x, j);
-            var k_i = k[i] + k_j*x;
-            return Math.floor(k_i);
-        }
+            var k_j = this.evaluate(x, j);
+            var k_i = this.k[i] + k_j*x;
+            if (this.discrete) {
+                return Math.floor(k_i);
+            }
+            else {
+                return k_i;
+            }
+        };
 
-        // affine formula from user input
-        // general form is f(t) = m*t + b
-        //                 where t = t_now - t_0
-        // start with m=0, b=0
-        // click one button to increment b
-        // click another button to increment m:
-        //     set b to f(t)
-        //     set m to m+1
-        //     set t0 to Date.now()
-        //
+        // general-purpose function to translate a polynomial from t_0 to t_1
         // TODO: determine whether this method can accommodate higher-order polynomials
         // f(t) = a * t^2 + b * t + c
         // f(t-t_0) = a*(t-t_0)^2 + b*(t-t_0) + c
         //          = a*(t^2 - 2*t_0*t + t_0^2) + b*t - b*t_0 + c
         //          = a*t^2 - (2*a*t_0 + b)*t + a*t_0^2 - b*t_0 + c
         // is t_0^2 meaningful?
-
-        // general-purpose function to translate a polynomial from t_0 to t_1
-        function translateAccum(accum, t_1) {
+        Accumulator.prototype.translate = function(t_1) {
             var newPoly = [];
-            for (var i = 0; i < accum.poly.length; i++) {
-                newPoly[i] = accum.poly[i];
+            for (var i = 0; i < this.k.length; i++) {
+                // TODO: support higher order translation
+                newPoly[i] = this.k[i];
             }
-            var t = (t_1-accum.t_0)/1000;
-            newPoly[0] = evaluatePolynomial(accum.poly, t);
-            return {
-                t_0: t_1,
-                poly: newPoly
-            }
+            var t = (t_1-this.t_0)/this.scale;
+            newPoly[0] = this.evaluate(t);
+            this.k = newPoly;
+            this.t_0 = t_1;
         };
-        var accumulator;
-        try {
-            accumulator = JSON.parse(localStorage.getItem('accumulator'));
-        }
-        catch (e) {}
-        accumulator = accumulator || {
-            t_0: startTime,
-            poly: []
-        };
-        function saveAccumulator() {
-            localStorage.setItem('accumulator', JSON.stringify(accumulator));
-            displayPolynomial(accumulator.poly, $('accumulator-formula'));
-            setText($('accumulator-t0'), new Date(accumulator.t_0));
-        }
-        saveAccumulator();
 
-        function modifyAccumulator(accum, mod) {
-            mod = mod || [];
-            if (skew == null) {
+        // would like to support negative mods with floors
+        // eg consume materials to produce products,
+        // without going below zero
+        Accumulator.prototype.addPolynomial = function(mod) {
+            if (skew == null && !this.trustClientClock) {
+                var that = this;
                 updateClockSkew(function(){
-                    modifyAccumulator(accum, mod);
+                    that.addPolynomial(mod);
                 });
             }
             else {
                 var t_1 = Date.now() - skew;
-                accumulator = translateAccum(accumulator, t_1);
+                this.translate(t_1);
+                mod = mod || [];
                 for (var i = 0; i < mod.length; i++) {
-                    accum[i] = (accum[i] || 0) + mod[i];
+                    this.k[i] = (this.k[i] || 0) + mod[i];
                 }
-                saveAccumulator();
+                // this.save();
             }
+        };
+
+        Accumulator.prototype.save = function() {
+            // TBD
+        };
+
+        var accumulator = new Accumulator();
+        try {
+            data = JSON.parse(localStorage.getItem('accumulator'));
+            accumulator = new Accumulator(data);
         }
-        // would like to support negative mods with floors
-        // eg consume materials to produce products,
-        // without going below zero
+        catch (e) {}
+
+        function saveAccumulator() {
+            localStorage.setItem('accumulator', JSON.stringify(accumulator));
+            displayPolynomial(accumulator.k, $('accumulator-formula'));
+            setText($('accumulator-t0'), new Date(accumulator.t_0));
+        }
+        saveAccumulator();
+
 
         $("add-one").onclick = function() {
-            modifyAccumulator(accumulator, [1]);
+            accumulator.addPolynomial([1]);
+            saveAccumulator();
         };
         $("add-one-per-second").onclick = function() {
-            modifyAccumulator(accumulator, [0, 1]);
+            accumulator.addPolynomial([0,1]);
+            saveAccumulator();
         };
         $("reset-accumulator").onclick = function() {
             accumulator.t_0 = Date.now() - skew;
