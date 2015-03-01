@@ -2,6 +2,7 @@
   "name": "incremental",
   "version": "1.0.0",
   "description": "",
+  "repository": "https://github.com/jjclark1982/incremental.git",
   "main": "node_modules/gulp/bin/gulp.js",
   "scripts": {
     "start": "gulp server",
@@ -10,10 +11,29 @@
   "author": "Jesse Clark <jjclark1982@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "autoprefixer-core": "^4.0.2",
     "browser-sync": "^2.2.1",
-    "coffee-script": "^1.9.1",
+    "cjsx-loader": "^1.1.0",
+    "coffee-loader": "^0.7.2",
+    "coffee-react-transform": "^2.1.0",
+    "coffee-script": "^1.8.0",
+    "css-loader": "^0.9.0",
+    "csswring": "^2.0.0",
+    "del": "^1.1.1",
+    "extract-text-webpack-plugin": "^0.3.5",
+    "file-loader": "^0.8.1",
     "gulp": "^3.8.11",
     "gulp-load-plugins": "^0.8.0",
-    "gulp-util": "^3.0.4"
+    "gulp-util": "^3.0.4",
+    "postcss-import": "^4.1.0",
+    "postcss-loader": "^0.2.0",
+    "purecss": "^0.5.0",
+    "react": "^0.12.2",
+    "react-hot-loader": "^1.0.2",
+    "style-loader": "^0.8.2",
+    "webpack": "^1.4.13"
+  },
+  "devDependencies": {
+    "webpack-dev-server": "^1.7.0"
   }
 }
