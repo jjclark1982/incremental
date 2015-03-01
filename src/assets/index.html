@@ -183,29 +183,6 @@
         }
         setFPS(targetFPS);
 
-        var skew = null;
-        function updateClockSkew(callback) {
-            // TODO: support multiple callbacks waiting on the same request
-            callback = callback || function(){};
-            skew = null;
-            var clientTime = Date.now();
-            request(document.location, {
-                method: 'HEAD',
-                headers: {'Cache-Control': 'no-cache'},
-                onload: function(){
-                    if (skew != null || this.status == 0) {
-                        return
-                    }
-                    var serverTime = new Date(this.getResponseHeader('date'));
-                    // I don't think we have a way to tell how much time elapsed while the server was preparing the response.
-                    skew = (Date.now()+clientTime)/2 - serverTime;
-                    setText($('serverTime'), skew);
-                    callback();
-                }
-            });
-        };
-        updateClockSkew();
-
         var polynomial = [];
         function randomizeFormula() {
             polynomial = [];
