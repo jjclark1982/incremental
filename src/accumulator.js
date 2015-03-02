@@ -6,6 +6,7 @@ function Accumulator(properties) {
     this.batched = false;
     this.scale = 1000;
     this.max = Infinity;
+    this.min = 0;
     this.t_0 = Date.now();
     this.k = [0];
     for (var i in properties) {
@@ -32,7 +33,13 @@ Accumulator.prototype.evaluate = function(x, i) {
         k_i = Math.floor(k_i);
     }
     if (i == 0) {
-        return Math.min(this.max, k_i)
+        if (this.max == null) {
+            this.max = Infinity;
+        }
+        if (this.min == null) {
+            this.min = -Infinity;
+        }
+        return Math.max(Math.min(k_i, this.max), this.min);
     }
     else {
         return k_i
