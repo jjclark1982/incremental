@@ -1,10 +1,13 @@
+clockSkew = require('./clockSkew');
+
 function Accumulator(properties) {
     this.trustClientClock = false;
     this.discrete = true;
     this.batched = false;
     this.scale = 1000;
+    this.max = Infinity;
     this.t_0 = Date.now();
-    this.k = [];
+    this.k = [0];
     for (var i in properties) {
         this[i] = properties[i];
     }
@@ -26,11 +29,21 @@ Accumulator.prototype.evaluate = function(x, i) {
     var k_j = this.evaluate(x, j);
     var k_i = this.k[i] + k_j*x;
     if (this.discrete) {
-        return Math.floor(k_i);
+        k_i = Math.floor(k_i);
+    }
+    if (i == 0) {
+        return Math.min(this.max, k_i)
     }
     else {
-        return k_i;
+        return k_i
     }
+};
+
+// TODO: handle skew here so consumers don't have to
+Accumulator.prototype.evaluateAtTime = function(t_1, i) {
+    var t = (t_1-this.t_0)/this.scale;
+    value = this.evaluate(t, i);
+    return Math.min(this.max, value)
 };
 
 // general-purpose function to translate a polynomial from t_0 to t_1
@@ -46,8 +59,7 @@ Accumulator.prototype.translate = function(t_1) {
         // TODO: support higher order translation
         newPoly[i] = this.k[i];
     }
-    var t = (t_1-this.t_0)/this.scale;
-    newPoly[0] = this.evaluate(t);
+    newPoly[0] = this.evaluateAtTime(t_1);
     this.k = newPoly;
     this.t_0 = t_1;
 };
@@ -56,21 +68,27 @@ Accumulator.prototype.translate = function(t_1) {
 // eg consume materials to produce products,
 // without going below zero
 Accumulator.prototype.addPolynomial = function(mod) {
-    if (skew == null && !this.trustClientClock) {
-        var that = this;
-        updateClockSkew(function(){
-            that.addPolynomial(mod);
-        });
+    var self = this;
+    if (mod.length == 1) { // bypass clock for constants
+        self.k[0] = (self.k[0] || 0) + mod[0];
+        if (self.onChange) {
+            self.onChange();
+        }
+        return
     }
-    else {
+    clockSkew.fetch(function(skew){
         var t_1 = Date.now() - skew;
-        this.translate(t_1);
+        self.translate(t_1);
         mod = mod || [];
         for (var i = 0; i < mod.length; i++) {
-            this.k[i] = (this.k[i] || 0) + mod[i];
+            self.k[i] = (self.k[i] || 0) + mod[i];
         }
-        // this.save();
-    }
+
+        // TODO: emit a proper change event
+        if (self.onChange) {
+            self.onChange();
+        }
+    });
 };
 
 Accumulator.prototype.save = function() {

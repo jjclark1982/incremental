@@ -1,5 +1,5 @@
 React = require('react')
-Polynomial = require('./polynomial')
+AccumulatorInspector = require('./accumulator-inspector')
 
 IncrementalApp = React.createClass({
     displayName: 'IncrementalApp'
@@ -9,7 +9,7 @@ IncrementalApp = React.createClass({
 
         return <div>
             <h1>Incremental</h1>
-            <Polynomial variable="t" coefficients={[1,2,3]} />
+            <AccumulatorInspector saveKey="accumulator" />
         </div>
 })
 
