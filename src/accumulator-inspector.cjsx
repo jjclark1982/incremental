@@ -2,6 +2,7 @@ React = require('react')
 Accumulator = require('./accumulator')
 Polynomial = require('./polynomial')
 clockSkew = require('./clockSkew')
+FPS = require('./fps')
 
 AccumulatorInspector = React.createClass({
     displayName: 'AccumulatorInspector'
@@ -18,9 +19,9 @@ AccumulatorInspector = React.createClass({
         @accumulator = new Accumulator(saveData)
         @accumulator.onChange = =>
             @setStateFromAccumulator()
-        @updateInterval = setInterval(=>
+        FPS.callbacks.push(=>
             @setStateFromAccumulator()
-        , 1000/12)
+        )
         @setStateFromAccumulator()
 
     componentWillUnmount: ->
@@ -29,7 +30,6 @@ AccumulatorInspector = React.createClass({
 
     setStateFromAccumulator: ->
         clockSkew.fetch((skew)=>
-            window.lastSkew = skew
             t = Date.now() - skew
             @setState({
                 accumulator: @accumulator

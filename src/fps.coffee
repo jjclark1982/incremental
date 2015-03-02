@@ -29,7 +29,7 @@ fps = {
         @lastFrame = now
 
         @measuredMsec ?= msecForThisFrame
-        @measuredMsec = (0.1 * msecForThisFrame) + (0.9 * @measuredMsec)
+        @measuredMsec = (0.125 * msecForThisFrame) + (0.875 * @measuredMsec)
         @measuredFPS = 1000 / @measuredMsec
 
         if Math.abs(msecForThisFrame - @targetMsec) > 1000
@@ -40,5 +40,6 @@ fps = {
 }
 
 window.FPS = fps
+fps.setTarget(12)
 
 module.exports = fps
