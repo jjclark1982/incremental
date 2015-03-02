@@ -5,7 +5,9 @@
   "repository": "https://github.com/jjclark1982/incremental.git",
   "main": "node_modules/gulp/bin/gulp.js",
   "scripts": {
-    "start": "gulp server",
+    "start": "webpack-dev-server",
+    "build": "webpack",
+    "clean": "gulp clean",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jesse Clark <jjclark1982@gmail.com>",
