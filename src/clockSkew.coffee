@@ -33,15 +33,15 @@ module.exports.fetch = (callback)->
 module.exports.invalidate = ->
     skew = null
 
-lastCheck = Date.now()
-expectedDuration = 1000
-checkTime = ->
-    now = Date.now()
-    duration = now - lastCheck
-    lastCheck = now
+# lastCheck = Date.now()
+# expectedDuration = 1000
+# checkTime = ->
+#     now = Date.now()
+#     duration = now - lastCheck
+#     lastCheck = now
 
-    if Math.abs(duration - expectedDuration) > 1000
-        console.log("Detected clock jump. Invalidating skew.", duration)
-        skew = null
+#     if Math.abs(duration - expectedDuration) > 1000
+#         console.log("Detected clock jump. Invalidating skew.", duration)
+#         skew = null
 
-setInterval(checkTime, expectedDuration)
+# setInterval(checkTime, expectedDuration)

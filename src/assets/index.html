@@ -2,168 +2,34 @@
 <head>
     <title>Incremental</title>
     <style>
-        body {
-            padding: 1em;
-            font-family: serif;
+        * { box-sizing: border-box; }
+        body { padding: 1em; font-family: serif; }
+        h1,h2,h3,h4,h5,h6 { font-family: sans-serif; }
+        #forkongithub a{box-sizing:content-box;background:#234;color:#fff;text-decoration:none;font-family:arial,sans-serif;text-align:center;font-weight:bold;padding:5px 40px;font-size:1rem;line-height:2rem;position:relative;transition:0.5s;}
+        #forkongithub a:hover{background:#468;color:#fff;}
+        #forkongithub a::before,
+        #forkongithub a::after{content:"";width:100%;display:block;position:absolute;top:1px;left:0;height:1px;background:#fff;}
+        #forkongithub a::after{bottom:1px;top:auto;}
+        @media screen and (min-width:800px){
+            #forkongithub{position:absolute;display:block;top:0;right:0;width:200px;overflow:hidden;height:200px;z-index:9999;}
+            #forkongithub a{width:200px;position:absolute;top:60px;right:-60px;transform:rotate(45deg);-webkit-transform:rotate(45deg);-ms-transform:rotate(45deg);-moz-transform:rotate(45deg);-o-transform:rotate(45deg);box-shadow:4px 4px 10px rgba(0,0,0,0.8);}
         }
-        #forkongithub a{background:#234;color:#fff;text-decoration:none;font-family:arial,sans-serif;text-align:center;font-weight:bold;padding:5px 40px;font-size:1rem;line-height:2rem;position:relative;transition:0.5s;}#forkongithub a:hover{background:#468;color:#fff;}#forkongithub a::before,#forkongithub a::after{content:"";width:100%;display:block;position:absolute;top:1px;left:0;height:1px;background:#fff;}#forkongithub a::after{bottom:1px;top:auto;}@media screen and (min-width:800px){#forkongithub{position:absolute;display:block;top:0;right:0;width:200px;overflow:hidden;height:200px;z-index:9999;}#forkongithub a{width:200px;position:absolute;top:60px;right:-60px;transform:rotate(45deg);-webkit-transform:rotate(45deg);-ms-transform:rotate(45deg);-moz-transform:rotate(45deg);-o-transform:rotate(45deg);box-shadow:4px 4px 10px rgba(0,0,0,0.8);}}
     </style>
 </head>
 <body>
-   
     <span id="forkongithub"><a href="https://github.com/jjclark1982/incremental">Fork me on GitHub</a></span>
 
-    <div style="position:fixed; top:0.5em; right:0.5em; display: none;">
-        <span id="fps"></span> FPS
+    <div id="content">
+        <h1>Incremental</h1>
+        <noscript>
+            This application requires JavaScript.
+            Here are the <a href="http://www.enable-javascript.com/" target="_blank">
+            instructions how to enable JavaScript in your web browser</a>.
+        </noscript>
+        <script>
+            document.write("Loading App...")
+        </script>
     </div>
-    <p style="display:none;">
-        Total frames: <span id="totalFrames"></span>
-    </p>
-    <p>
-        Time on this page: <span id="timeOnPage">0</span> sec
-    </p>
-    <p>
-        Clock skew: <span id="serverTime"></span> msec
-        <button onclick="updateClockSkew()">update</button>
-    </p>
-    <p style="display: none;">
-        Time since last click: <var>t</var> = <span id="timeSinceClick"></span> sec
-        <button id="clickMe">click</button>
-        Formula: <var>f</var>(<var>t</var>) = <span id="formula"></span>
-        <button id="randomize-formula">randomize</button>
-        <br>
-        Value of formula: <span id="formula-value"></span>
-    </p>
-    <p style="line-height: 20px;">
-        Accumulator start: <var>t<sub>0</sub></var> = <span id="accumulator-t0"></span>
-        <br>
-        Accumulator offset: <var>t</var> = <span id="accumulator-t"></span> sec
-        <br>
-        Accumulator formula: <var>f</var>(<var>t</var>) = <span id="accumulator-formula">0</span>
-        <br>
-        Continuous value: <span id="accumulator-value"></span>
-        <br>
-        Discrete value: <span id="accumulator-value-discrete"></span>
-    </p>
-    <p>
-        <button id="add-one-per-second">Add 1 per second</button>
-        <button id="add-one">Add 1</button>
-        <button id="reset-accumulator">Reset</button>
-    </p>
-    <script>
-        var clickTime = window.localStorage.getItem('clickTime') || Date.now();
-        $('clickMe').onclick = function(){
-            var now = Date.now();
-            var serverNow = now - skew;
-            // actually, we want to make sure skew is valid before using it
-            clickTime = serverNow;
-            window.localStorage.setItem('clickTime', clickTime);
-        }
-
-        var $timeOnPage = $('timeOnPage');
-        var $fps = $('fps');
-        var $totalFrames = $('totalFrames');
-        var $timeSinceClick = $('timeSinceClick');
-        var $formulaValue = $('formula-value');
-        var startTime = Date.now();
-        var lastFrame = startTime;
-        var frameCount = 0;
-        var totalFrames = 0;
-        var targetFPS = 12;
-        var msecPerFrame = 1000/targetFPS;
-        function tick() {
-            var now = Date.now();
-            setText($timeOnPage, Math.floor((now - startTime)/1000));
-            setText($totalFrames, ++totalFrames);
-
-            var msecForThisFrame = now - lastFrame;
-            lastFrame = now;
-
-            msecPerFrame = (0.1 * msecForThisFrame) + (0.9 * msecPerFrame);
-            setText($fps, Math.round(1000 / msecPerFrame));
-
-            if (Math.abs(msecForThisFrame) > 1000/targetFPS + 100) {
-                console.log('detected clock jump. reloading time from server.', msecForThisFrame);
-                updateClockSkew();
-            }
-
-
-            var msecSinceClick = (now - clickTime - skew)
-            setText($timeSinceClick, (msecSinceClick/100|0)/10);
-
-            var value = evaluatePolynomial(polynomial, msecSinceClick/1000);
-            setText($formulaValue, Math.floor(value));
-
-            var accum_t = (now - accumulator.t_0 - skew)/1000;
-            var accum_value = evaluatePolynomial(accumulator.k, accum_t);
-            var accum_value_d = accumulator.evaluate(accum_t);
-            setText($('accumulator-t'), accum_t);
-            setText($('accumulator-value'), Math.floor(accum_value));
-            setText($('accumulator-value-discrete'), Math.floor(accum_value_d));
-        }
-
-        var displayInterval = null;
-        function setFPS(fps) {
-            targetFPS = fps;
-            clearInterval(displayInterval);
-            displayInterval = setInterval(function(){
-                requestAnimationFrame(tick);
-            }, 1000/fps);
-        }
-        setFPS(targetFPS);
-
-        var polynomial = [];
-        function randomizeFormula() {
-            polynomial = [];
-            for (var i = 0; i < 3; i++) {
-                polynomial[i] = Math.random()*10|0;
-            }
-            displayPolynomial(polynomial, $('formula'));
-        }
-        $('randomize-formula').onclick = randomizeFormula;
-        randomizeFormula();
-
-        function evaluatePolynomial(coefficients, x) {
-            var accum = 0;
-            var x_to_exp = 1;
-            for (var exp = 0; exp < coefficients.length; exp++) {
-                var k_i = coefficients[exp] || 0;
-                accum += k_i * x_to_exp;
-                x_to_exp *= x;
-            }
-            return accum;
-        }
-
-        var accumulator = new Accumulator();
-        try {
-            data = JSON.parse(localStorage.getItem('accumulator'));
-            accumulator = new Accumulator(data);
-        }
-        catch (e) {}
-
-        function saveAccumulator() {
-            localStorage.setItem('accumulator', JSON.stringify(accumulator));
-            displayPolynomial(accumulator.k, $('accumulator-formula'));
-            setText($('accumulator-t0'), new Date(accumulator.t_0));
-        }
-        saveAccumulator();
-
-
-        $("add-one").onclick = function() {
-            accumulator.addPolynomial([1]);
-            saveAccumulator();
-        };
-        $("add-one-per-second").onclick = function() {
-            accumulator.addPolynomial([0,1]);
-            saveAccumulator();
-        };
-        $("reset-accumulator").onclick = function() {
-            accumulator.t_0 = Date.now() - skew;
-            accumulator.poly = [];
-            saveAccumulator();
-        };
-
-    </script>
-    <div id="content"></div>
+    
     <script src="/bundle.js"></script>
 </body>
