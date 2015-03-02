@@ -29,7 +29,8 @@ Accumulator.prototype.evaluate = function(x, i) {
     var j = i + 1;
     var k_j = this.evaluate(x, j);
     var k_i = this.k[i] + k_j*x;
-    if (this.discrete) {
+    if (this.discrete && i != 0) {
+        // fractional amounts are useful for translation, so keep them at the very end
         k_i = Math.floor(k_i);
     }
     if (i == 0) {

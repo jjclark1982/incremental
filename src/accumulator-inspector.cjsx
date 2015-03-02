@@ -34,7 +34,7 @@ AccumulatorInspector = React.createClass({
             @setState({
                 accumulator: @accumulator
                 polynomial: @accumulator.k
-                value: @accumulator.evaluateAtTime(t)
+                value: Math.floor(@accumulator.evaluateAtTime(t))
             })
         )
 
