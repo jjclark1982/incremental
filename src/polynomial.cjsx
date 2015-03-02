@@ -17,15 +17,14 @@ Polynomial = React.createClass({
     displayName: 'Polynomial'
 
     render: ->
-        # console.log("rendering polynomial", @props.coefficients)
         variable = @props.variable or 'x'
         terms = []
-        for k_i, i in @props.coefficients
-            if i > 0
-                if !k_i
-                    continue
-                terms.push(" + ")
+        for k_i, i in @props.coefficients when k_i
+            if terms.length > 0
+                terms.push(' + ')
             terms.push(<Term key={i} k={k_i} exp={i} variable={variable} />)
+        if terms.length is 0
+            terms.push('0')
         terms.reverse()
 
         return <span>{terms}</span>
