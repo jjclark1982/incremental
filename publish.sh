@@ -17,7 +17,7 @@ git clone . "$PUBLISH_DIR"
 (cd "$PUBLISH_DIR"; git checkout "$PUBLISH_BRANCH"; rm -r *)
 
 # build with a script that will terminate
-NODE_ENV=production webpack
+NODE_ENV=${NODE_ENV:-production} webpack
 
 cd "$PUBLISH_DIR"
 git add --all .
