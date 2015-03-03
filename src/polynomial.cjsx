@@ -5,6 +5,7 @@ Term = React.createClass({
     render: ->
         coefficient = @props.k
 
+        # all terms but the first one have a plus or minus operator
         if !@props.initial
             if coefficient < 0
                 coefficient = -coefficient
@@ -12,10 +13,12 @@ Term = React.createClass({
             else
                 op = '+'
 
-        if coefficient is 1 and @props.exp isnt 0
-            coefficient = ''
-        if coefficient is -1
-            coefficient = '-'
+        # all terms but the constant have optional coefficients
+        if @props.exp isnt 0
+            if coefficient is 1
+                coefficient = ''
+            if coefficient is -1
+                coefficient = '-'
 
         if @props.exp > 0
             variable = @props.variable or 'x'
