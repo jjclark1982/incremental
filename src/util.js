@@ -56,10 +56,20 @@ function request(url, options) {
     }
     // serialize body as specified by Content-Type header
     if (args.body && typeof args.body !== 'string') {
-        var contentType = args.headers['Content-Type'];
+        var contentType;
+        for (var header in args.headers) {
+            if (header.toLowerCase() == 'content-type') {
+                contentType = args.headers[header];
+                break;
+            }
+        }
+        if (!contentType) {
+            contentType = args.headers['Content-Type'] = 'application/json';
+        }
         if (contentType == 'application/json') {
             args.body = JSON.stringify(args.body);
-        } else if (contentType == 'application/x-www-form-urlencoded') {
+        }
+        else if (contentType == 'application/x-www-form-urlencoded') {
             args.body = serializeQuery(args.body);
         }
     }
@@ -73,7 +83,7 @@ function request(url, options) {
 }
 
 // Fill in an element with the given value.
-// Uses value for input elements, and text otherwise.
+// Uses value for input elements, and text otherwise. Cross-browser compatible.
 function setText(field, value) {
     var props = ['value', 'textContent', 'innerText'];
     for (var i in props) {
@@ -85,7 +95,7 @@ function setText(field, value) {
     }
 }
 
-// Create a DOM element from a template string,
+// Create a DOM element from a template string or element,
 // and fill in named fields with values from `context`.
 function render(template, context) {
     var container = document.createElement('div');
@@ -110,6 +120,7 @@ if (typeof module !== 'undefined') {
         $$: $$,
         request: request,
         serializeQuery: serializeQuery,
+        parseQuery: parseQuery,
         render: render,
         setText: setText
     };
