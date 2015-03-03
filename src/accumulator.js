@@ -1,12 +1,6 @@
 clockSkew = require('./clockSkew');
 
 function Accumulator(properties) {
-    this.trustClientClock = false;
-    this.discrete = true;
-    this.batched = false;
-    this.scale = 1000;
-    this.max = Infinity;
-    this.min = 0;
     this.t_0 = Date.now();
     this.k = [0];
     for (var i in properties) {
@@ -14,10 +8,19 @@ function Accumulator(properties) {
     }
 }
 
-// number of widgets at time t = edp(poly, t, 0)
-// number of widget factories at time t = edp(poly, t, 1)
+// default values
+Accumulator.prototype.trustClientClock = false;
+Accumulator.prototype.discrete = true;
+Accumulator.prototype.batched = false;
+Accumulator.prototype.scale = 1000;
+Accumulator.prototype.max = Infinity;
+Accumulator.prototype.min = 0;
+
+// number of widgets at time t = evaluate(poly, t, 0)
+// number of widget factories at time t = evaluate(poly, t, 1)
 // number of manually-bought factories = poly[1]
-// TODO: do these equivalences still hold after translation?
+// these equivalences still hold after first-order translation,
+// but not higher-order translation.
 Accumulator.prototype.evaluate = function(x, i) {
     i = i || 0;
     if (i >= this.k.length) {
@@ -43,7 +46,7 @@ Accumulator.prototype.evaluate = function(x, i) {
         return Math.max(Math.min(k_i, this.max), this.min);
     }
     else {
-        return k_i
+        return k_i;
     }
 };
 
@@ -51,7 +54,19 @@ Accumulator.prototype.evaluate = function(x, i) {
 Accumulator.prototype.evaluateAtTime = function(t_1, i) {
     var t = (t_1-this.t_0)/this.scale;
     value = this.evaluate(t, i);
-    return Math.min(this.max, value)
+    return Math.min(this.max, value);
+};
+
+// first derivative of value
+Accumulator.prototype.rateAtTime = function(t_1) {
+    var t = (t_1-this.t_0)/this.scale;
+    return this.evaluate(t, 1);
+};
+
+// For 'batched' accumulators, the progress until the next batch is complete.
+Accumulator.prototype.progressAtTime = function(t_1) {
+    var t = (t_1-this.t_0)/this.scale;
+    return t - Math.floor(t);
 };
 
 // general-purpose function to translate a polynomial from t_0 to t_1
@@ -82,7 +97,7 @@ Accumulator.prototype.addPolynomial = function(mod) {
         if (self.onChange) {
             self.onChange();
         }
-        return
+        return;
     }
     clockSkew.fetch(function(skew){
         var t_1 = Date.now() - skew;
@@ -97,10 +112,6 @@ Accumulator.prototype.addPolynomial = function(mod) {
             self.onChange();
         }
     });
-};
-
-Accumulator.prototype.save = function() {
-    // TBD
 };
 
 module.exports = Accumulator;
