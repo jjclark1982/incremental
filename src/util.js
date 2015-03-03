@@ -52,7 +52,7 @@ function request(url, options) {
         }
     }
     if (args.query && typeof args.query !== 'string') {
-        url = url + '?' + serializeQuery(query);
+        url = url + '?' + serializeQuery(args.query);
     }
     // serialize body as specified by Content-Type header
     if (args.body && typeof args.body !== 'string') {
