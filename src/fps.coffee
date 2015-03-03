@@ -11,17 +11,23 @@ fps = {
     displayInterval: null
     setTarget: (targetFPS)->
         @targetFPS = targetFPS
-        @targetMsec = 1000 / targetFPS
+        @targetMsec = Math.floor(1000 / targetFPS)
         clearInterval(@displayInterval)
-        @displayInterval = setInterval(=>
-            requestAnimationFrame(@tick.bind(this))
-        , @targetMsec)
+        @displayInterval = setInterval(@tick.bind(@), @targetMsec)
+
+    frameRequested: false
+    tick: ->
+        if !@frameRequested
+            requestAnimationFrame(@frame.bind(@))
+            @frameRequested = true
 
     measuredFPS: null
     measuredMsec: null
     lastFrame: Date.now()
     callbacks: []
-    tick: ->
+    frame: ->
+        @frameRequested = false
+
         now = Date.now()
         @msOnPage = now - startTime
 
@@ -39,7 +45,6 @@ fps = {
             callback?()
 }
 
-window.FPS = fps
 fps.setTarget(12)
 
 module.exports = fps
