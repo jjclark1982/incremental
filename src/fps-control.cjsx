@@ -1,5 +1,5 @@
 React = require('react')
-FPS = require('./fps')
+clock = require('./clock')
 
 style = {
     display: 'inline-block',
@@ -14,13 +14,13 @@ FPSControl = React.createClass({
 
     getInitialState: ->
         return {
-            targetFPS: FPS.targetFPS
-            measuredFPS: FPS.targetFPS
+            targetFPS: clock.targetFPS
+            measuredFPS: clock.targetFPS
         }
 
     componentWillMount: ->
-        FPS.callbacks.push(=>
-            @setState({measuredFPS: Math.round(FPS.measuredFPS)})
+        clock.callbacks.push(=>
+            @setState({measuredFPS: Math.round(clock.measuredFPS)})
         )
 
     shouldComponentUpdate: (nextProps, nextState)->
@@ -32,7 +32,7 @@ FPSControl = React.createClass({
 
     changed: (event)->
         targetFPS = event.target.value
-        FPS.setTarget(event.target.value)
+        clock.setTargetFPS(event.target.value)
         @setState({
             targetFPS: targetFPS
         })
