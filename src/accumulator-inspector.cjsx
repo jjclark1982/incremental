@@ -18,9 +18,7 @@ AccumulatorInspector = React.createClass({
         @accumulator = new Accumulator(saveData)
         @accumulator.onChange = =>
             @setStateFromAccumulator()
-        clock.callbacks.push(=>
-            @setStateFromAccumulator()
-        )
+        clock.on('frame', @setStateFromAccumulator, @)
         @setStateFromAccumulator()
 
     componentWillUnmount: ->
@@ -38,7 +36,7 @@ AccumulatorInspector = React.createClass({
             })
         )
 
-    componentShouldUpdate: (nextProps, nextState)->
+    shouldComponentUpdate: (nextProps, nextState)->
         if nextState.value isnt @state.value
             return true
         if nextState.rate isnt @state.rate

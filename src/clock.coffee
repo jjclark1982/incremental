@@ -1,50 +1,62 @@
 clockSkew = require('./clockSkew')
+EventEmitter = require('./event-emitter')
 
-startTime = Date.now()
+class Clock extends EventEmitter
+    constructor: (options)->
+        for key, val of options
+            this[key] = val
+        @startTime ?= Date.now()
+        @lastFrame ?= Date.now()
+        if @targetFPS
+            @setTargetFPS(@targetFPS)
 
-fps = {
+    startTime: null
     msOnPage: 0
 
     targetFPS: null
     targetMsec: null
 
     displayInterval: null
-    setTarget: (targetFPS)->
+    setTargetFPS: (targetFPS)->
         @targetFPS = targetFPS
-        @targetMsec = Math.floor(1000 / targetFPS)
         clearInterval(@displayInterval)
-        @displayInterval = setInterval(@tick.bind(@), @targetMsec)
+        if targetFPS > 0
+            @targetMsec = Math.floor(1000 / targetFPS)
+            @displayInterval = setInterval(@tick.bind(@), @targetMsec)
 
     frameRequested: false
     tick: ->
+        @now = Date.now()
+        @msOnPage = @now - @startTime
+        @trigger("tick")
         if !@frameRequested
             requestAnimationFrame(@frame.bind(@))
             @frameRequested = true
 
     measuredFPS: null
     measuredMsec: null
-    lastFrame: Date.now()
-    callbacks: []
+    lastFrame: null
     frame: ->
         @frameRequested = false
 
-        now = Date.now()
-        @msOnPage = now - startTime
-
-        msecForThisFrame = now - @lastFrame
-        @lastFrame = now
+        msecForThisFrame = @now - @lastFrame
+        @lastFrame = @now
 
         @measuredMsec ?= msecForThisFrame
         @measuredMsec = (0.125 * msecForThisFrame) + (0.875 * @measuredMsec)
         @measuredFPS = 1000 / @measuredMsec
 
+        @trigger("frame")
+
+        # TODO move this into a listener
         if Math.abs(msecForThisFrame - @targetMsec) > 1000
             clockSkew.invalidate()
 
-        for callback in @callbacks
-            callback?()
-}
+module.exports = new Clock({
+    targetFPS: 12
+})
 
-fps.setTarget(12)
+if window.clock
+    window.clock.setTargetFPS(0)
 
-module.exports = fps
+window.clock = module.exports

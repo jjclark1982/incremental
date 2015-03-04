@@ -19,9 +19,9 @@ FPSControl = React.createClass({
         }
 
     componentWillMount: ->
-        clock.callbacks.push(=>
+        clock.on('frame', ->
             @setState({measuredFPS: Math.round(clock.measuredFPS)})
-        )
+        , @)
 
     shouldComponentUpdate: (nextProps, nextState)->
         if nextState.measuredFPS isnt @state.measuredFPS
