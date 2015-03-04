@@ -1,4 +1,3 @@
-clockSkew = require('./clockSkew')
 EventEmitter = require('./event-emitter')
 
 class Clock extends EventEmitter
@@ -36,21 +35,18 @@ class Clock extends EventEmitter
     measuredFPS: null
     measuredMsec: null
     lastFrame: null
+    msecForThisFrame: null
     frame: ->
         @frameRequested = false
 
-        msecForThisFrame = @now - @lastFrame
+        @msecForThisFrame = @now - @lastFrame
         @lastFrame = @now
 
-        @measuredMsec ?= msecForThisFrame
-        @measuredMsec = (0.125 * msecForThisFrame) + (0.875 * @measuredMsec)
+        @measuredMsec ?= @msecForThisFrame
+        @measuredMsec = (0.125 * @msecForThisFrame) + (0.875 * @measuredMsec)
         @measuredFPS = 1000 / @measuredMsec
 
         @trigger("frame")
-
-        # TODO move this into a listener
-        if Math.abs(msecForThisFrame - @targetMsec) > 1000
-            clockSkew.invalidate()
 
 module.exports = new Clock({
     targetFPS: 12

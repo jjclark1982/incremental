@@ -1,9 +1,10 @@
 {request} = require('./util')
+clock = require('./clock')
 
 skew = null
 callbacks = null
 
-module.exports.fetch = (callback)->
+fetch = (callback)->
     if skew
         return callback(skew)
 
@@ -11,8 +12,9 @@ module.exports.fetch = (callback)->
         callbacks.push(callback)
         return
 
-    callbacks = [callback]
     skew = null
+    callbacks = [callback]
+
     clientTime = Date.now()
     request(document.location, {
         method: 'HEAD',
@@ -22,26 +24,22 @@ module.exports.fetch = (callback)->
                 return
 
             serverTime = new Date(this.getResponseHeader('date'))
-            # I don't think we have a way to tell how much time elapsed while the server was preparing the response.
             skew = (Date.now()+clientTime)/2 - serverTime
 
-            for c in callbacks
-                c(skew)
+            for callback in callbacks
+                callback(skew)
             callbacks = null
     })
 
-module.exports.invalidate = ->
+invalidate = ->
     skew = null
 
-# lastCheck = Date.now()
-# expectedDuration = 1000
-# checkTime = ->
-#     now = Date.now()
-#     duration = now - lastCheck
-#     lastCheck = now
+clock.on('frame', ->
+    if Math.abs(clock.msecForThisFrame - clock.targetMsec) > 1000
+        invalidate()
+)
 
-#     if Math.abs(duration - expectedDuration) > 1000
-#         console.log("Detected clock jump. Invalidating skew.", duration)
-#         skew = null
-
-# setInterval(checkTime, expectedDuration)
+module.exports = {
+    fetch: fetch
+    invalidate: invalidate
+}
