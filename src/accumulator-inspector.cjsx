@@ -36,15 +36,15 @@ AccumulatorInspector = React.createClass({
             })
         )
 
-    shouldComponentUpdate: (nextProps, nextState)->
-        if nextState.value isnt @state.value
-            return true
-        if nextState.rate isnt @state.rate
-            return true
-        for k_i, i in nextState.accumulator?.k or []
-            if @state.accumulator.k[i] isnt k_i
-                return true
-        return false
+    # shouldComponentUpdate: (nextProps, nextState)->
+    #     if nextState.value isnt @state.value
+    #         return true
+    #     if nextState.rate isnt @state.rate
+    #         return true
+    #     for k_i, i in nextState.accumulator?.k or []
+    #         if @state.accumulator.k[i] isnt k_i
+    #             return true
+    #     return false
 
     addOne: ->
         @accumulator.addPolynomial([1])
@@ -86,11 +86,15 @@ AccumulatorInspector = React.createClass({
                 {(new Date()).toString()}
             </p>
             <p className="math">
-                <var>t</var> = <var>t</var><sub>1</sub> &ndash; <var>t</var><sub>0</sub>
-                {' = '}
-                {(@state.t - @state.accumulator.t_0)/ @state.accumulator.scale} sec
+                Time scale: 1 tick = {@state.accumulator.scale} ms
             </p>
             <p className="math">
+                <var>t</var> = <var>t</var><sub>1</sub> &ndash; <var>t</var><sub>0</sub>
+                {' = '}
+                {(@state.t - @state.accumulator.t_0)/ @state.accumulator.scale} ticks
+            </p>
+            <p className="math">
+                Current value:{' '}
                 <var>f</var>(<var>t</var>)
                 {' = '}
                 <Polynomial variable={variable} coefficients={@state.accumulator.k} />
@@ -98,9 +102,10 @@ AccumulatorInspector = React.createClass({
                 {@state.value}
             </p>
             <p className="math">
+                Current rate:{' '}
                 <var>f&prime;</var>(<var>t</var>)
                 {' = '}
-                {@state.rate} / sec
+                {@state.rate} per tick
             </p>
             <button className="pure-button" onClick={@addOne}>Add 1</button>{' '}
             <button className="pure-button" onClick={@addOnePerSecond}>Add 1/sec</button>{' '}
