@@ -22,22 +22,22 @@ class Clock extends EventEmitter
         if targetFPS > 0
             @targetMsec = Math.floor(1000 / targetFPS)
             @displayInterval = setInterval(@tick.bind(@), @targetMsec)
+            @tick()
 
-    frameRequested: false
+    frameRequest: null
     tick: ->
         @now = Date.now()
         @msOnPage = @now - @startTime
         @trigger("tick")
-        if !@frameRequested
-            requestAnimationFrame(@frame.bind(@))
-            @frameRequested = true
+        if !@frameRequest
+            @frameRequest = requestAnimationFrame(@frame.bind(@))
 
     measuredFPS: null
     measuredMsec: null
     lastFrame: null
     msecForThisFrame: null
     frame: ->
-        @frameRequested = false
+        @frameRequest = null
 
         @msecForThisFrame = @now - @lastFrame
         @lastFrame = @now
