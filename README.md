@@ -34,10 +34,3 @@ Compiler and server behavior can be controlled through environment variables:
 - unified controls for incrementing/decrementing each order of an accumulator's polynomial
 
 - graph of value for each type
-
-- support cancelable event listeners instead of current `fps.callbacks`, eg:
-
-        listener = this
-        clock.onTick(..., listener)
-        clock.onFrame(..., listener)
-        clock.off(listener)

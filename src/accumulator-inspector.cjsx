@@ -33,6 +33,7 @@ AccumulatorInspector = React.createClass({
                 t: t
                 value: Math.floor(@accumulator.evaluateAtTime(t))
                 rate: @accumulator.rateAtTime(t)
+                progress: @accumulator.progressAtTime(t)
             })
         )
 
@@ -76,46 +77,46 @@ AccumulatorInspector = React.createClass({
 
         return <div>
             <p className="math">
-                <var>t</var><sub>0</sub>
-                {' = '}
+                <var>t</var><sub>0</sub>{' = '}
                 {(new Date(@state.accumulator.t_0)).toString()}
             </p>
             <p className="math">
-                <var>t</var><sub>1</sub>
-                {' = '}
+                <var>t</var><sub>1</sub>{' = '}
                 {(new Date()).toString()}
             </p>
             <p className="math">
                 Time scale: 1 tick = {@state.accumulator.scale} ms
             </p>
             <p className="math">
-                <var>t</var> = <var>t</var><sub>1</sub> &ndash; <var>t</var><sub>0</sub>
-                {' = '}
+                <var>t</var> = <var>t</var><sub>1</sub> &ndash; <var>t</var><sub>0</sub>{' = '}
                 {(@state.t - @state.accumulator.t_0)/ @state.accumulator.scale} ticks
             </p>
             <p className="math">
                 Current value:{' '}
-                <var>f</var>(<var>t</var>)
-                {' = '}
-                <Polynomial variable={variable} coefficients={@state.accumulator.k} />
-                {' = '}
+                <var>f</var>(<var>t</var>){' = '}
+                <Polynomial variable={variable} coefficients={@state.accumulator.k} />{' = '}
                 {@state.value}
             </p>
             <p className="math">
                 Current rate:{' '}
-                <var>f&prime;</var>(<var>t</var>)
-                {' = '}
+                <var>f&prime;</var>(<var>t</var>){' = '}
                 {@state.rate} per tick
             </p>
-            <button className="pure-button" onClick={@addOne}>Add 1</button>{' '}
-            <button className="pure-button" onClick={@addOnePerSecond}>Add 1/sec</button>{' '}
-            <button className="pure-button" onClick={@addOnePerSecondPerSecond}>Add 1/sec<sup>2</sup></button>{' '}
-            <button className="pure-button" onClick={@reset}>Reset</button>{' '}
-            <button className="pure-button" onClick={@save}>Save</button>
-            <br/>
-            <br/>
-            <label className="pure-checkbox"><input type="checkbox" onChange={@toggleDiscrete} checked={@state.accumulator.discrete} /> discrete</label>{' '}
-            <label className="pure-checkbox"><input type="checkbox" onChange={@toggleBatched} checked={@state.accumulator.batched} /> batched</label>
+            <p className="math">
+                Progress:{' '}
+                <progress value={@state.progress} max="1">{@state.progress*100|0} %</progress>
+            </p>
+            <p>
+                <button className="pure-button" onClick={@addOne}>Add 1</button>{' '}
+                <button className="pure-button" onClick={@addOnePerSecond}>Add 1/sec</button>{' '}
+                <button className="pure-button" onClick={@addOnePerSecondPerSecond}>Add 1/sec<sup>2</sup></button>{' '}
+                <button className="pure-button" onClick={@reset}>Reset</button>{' '}
+                <button className="pure-button" onClick={@save}>Save</button>
+            </p>
+            <p>
+                <label className="pure-checkbox"><input type="checkbox" onChange={@toggleDiscrete} checked={@state.accumulator.discrete} /> discrete</label>{' '}
+                <label className="pure-checkbox"><input type="checkbox" onChange={@toggleBatched} checked={@state.accumulator.batched} /> batched</label>
+            </p>
         </div>
 })
 
