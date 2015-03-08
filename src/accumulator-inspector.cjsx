@@ -75,6 +75,9 @@ AccumulatorInspector = React.createClass({
         window.lastAI = this
         variable = 't'
 
+        if @state.progress
+            progress = <progress value={@state.progress} max="1">{@state.progress*100|0} %</progress>
+
         return <div>
             <p className="math">
                 <var>t</var><sub>0</sub>{' = '}
@@ -103,8 +106,7 @@ AccumulatorInspector = React.createClass({
                 {@state.rate} per tick
             </p>
             <p className="math">
-                Progress:{' '}
-                <progress value={@state.progress} max="1">{@state.progress*100|0} %</progress>
+                Progress: {progress}
             </p>
             <p>
                 <button className="pure-button" onClick={@addOne}>Add 1</button>{' '}

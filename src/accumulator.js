@@ -65,8 +65,26 @@ Accumulator.prototype.rateAtTime = function(t_1) {
 
 // For 'batched' accumulators, the progress until the next batch is complete.
 Accumulator.prototype.progressAtTime = function(t_1) {
+    if (this.isConstant()) {
+        return NaN;
+    }
     var t = (t_1-this.t_0)/this.scale;
     return t - Math.floor(t);
+};
+
+Accumulator.prototype.degree = function() {
+    var degree = 0;
+    for (var i = 0; i < this.k.length; i++) {
+        var k_i = this.k[i];
+        if (k_i) {
+            degree = i;
+        }
+    }
+    return degree;
+};
+
+Accumulator.prototype.isConstant = function() {
+    return (this.degree() == 0);
 };
 
 // general-purpose function to translate a polynomial from t_0 to t_1
