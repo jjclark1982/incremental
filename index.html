@@ -16,6 +16,7 @@
             #forkongithub a{width:200px;position:absolute;top:60px;right:-60px;transform:rotate(45deg);-webkit-transform:rotate(45deg);-ms-transform:rotate(45deg);-moz-transform:rotate(45deg);-o-transform:rotate(45deg);box-shadow:4px 4px 10px rgba(0,0,0,0.8);}
         }
     </style>
+    <link rel="script" type="text/javascript" href="//incremental.modusponens.org/bundle.js">
 </head>
 <body>
     <span id="forkongithub"><a href="https://github.com/jjclark1982/incremental">Fork me on GitHub</a></span>
@@ -28,9 +29,36 @@
             instructions how to enable JavaScript in your web browser</a>.
         </noscript>
         <script>
-            document.write("Loading App...")
+            (function(d, p){
+                p = d.createElement('p');
+                p.innerHTML = 'Loading App...<br>';
+                d.body.appendChild(p);
+
+                var links = d.querySelectorAll('link[rel="script"]');
+                var linksLoaded = 0;
+                Array.prototype.forEach.call(links, function(link){
+                    var progress = d.createElement('progress');
+                    p.appendChild(progress);
+                    var xhr = new XMLHttpRequest();
+                    xhr.onprogress = function(e){
+                        if (!e.total) return;
+                        progress.value = (e.loaded / e.total)*100;
+                    };
+                    xhr.onreadystatechange = function(e, s){
+                        if (this.readyState != 4) return;
+                        s = d.createElement('script');
+                        s.type = link.type;
+                        s.src = link.href;
+                        s.async = true;
+                        link.parentNode.insertBefore(s, link.nextSibling);
+                        if (++linksLoaded == links.length) {
+                            p.remove();
+                        }
+                    };
+                    xhr.open('GET', link.href, true);
+                    xhr.send();
+                });
+            })(document);
         </script>
     </div>
-    
-    <script src="bundle.js"></script>
 </body>
