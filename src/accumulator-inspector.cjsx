@@ -9,7 +9,7 @@ AccumulatorInspector = React.createClass({
 
     getInitialState: ->
         return {
-            accumulator: {k: []}
+            accumulator: new Accumulator()
             value: 0
         }
 
@@ -65,7 +65,7 @@ AccumulatorInspector = React.createClass({
         @setStateFromAccumulator()
 
     reset: ->
-        @accumulator.k = [0]
+        @accumulator.reset()
         @setStateFromAccumulator()
 
     save: ->
@@ -97,7 +97,7 @@ AccumulatorInspector = React.createClass({
             <p className="math">
                 Current value:{' '}
                 <var>f</var>(<var>t</var>){' = '}
-                <PolynomialView variable={variable} coefficients={@state.accumulator.k} />{' = '}
+                <PolynomialView poly={@accumulator.poly} variable={variable} />{' = '}
                 {@state.value}
             </p>
             <p className="math">

@@ -35,9 +35,9 @@ Polynomial = React.createClass({
     render: ->
         variable = @props.variable or 'x'
         terms = []
-        for k_i, i in @props.coefficients when k_i
-            # TODO: determine 'initial' based on degree, not array length
-            initial = (i is @props.coefficients.length - 1)
+        degree = @props.poly.degree()
+        for k_i, i in @props.poly.k when k_i
+            initial = (i is degree)
             term = <Term key={i} k={k_i} exp={i} variable={variable} initial={initial}/>
             terms.push(term)
         if terms.length is 0
