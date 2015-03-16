@@ -1,6 +1,6 @@
 React = require('react')
 Accumulator = require('./accumulator')
-Polynomial = require('./polynomial')
+PolynomialView = require('./polynomial-view')
 clockSkew = require('./clockSkew')
 clock = require('./clock')
 
@@ -97,7 +97,7 @@ AccumulatorInspector = React.createClass({
             <p className="math">
                 Current value:{' '}
                 <var>f</var>(<var>t</var>){' = '}
-                <Polynomial variable={variable} coefficients={@state.accumulator.k} />{' = '}
+                <PolynomialView variable={variable} coefficients={@state.accumulator.k} />{' = '}
                 {@state.value}
             </p>
             <p className="math">
