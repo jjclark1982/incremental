@@ -41,7 +41,7 @@ FPSControl = React.createClass({
         return <div style={style}>
             {@state.measuredFPS}/{@state.targetFPS} FPS
             <br/>
-            <input type="range" min=1 max=60 onChange={@changed} defaultValue={12} />
+            <input type="range" min=1 max=60 onChange={@changed} defaultValue={30} />
         </div>
 })
 

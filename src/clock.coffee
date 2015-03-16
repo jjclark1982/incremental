@@ -49,7 +49,7 @@ class Clock extends EventEmitter
         @trigger("frame")
 
 module.exports = new Clock({
-    targetFPS: 12
+    targetFPS: 30
 })
 
 if window.clock
