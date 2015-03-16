@@ -88,20 +88,14 @@ Accumulator.prototype.isConstant = function() {
 };
 
 // general-purpose function to translate a polynomial from t_0 to t_1
-// TODO: determine whether this method can accommodate higher-order polynomials
-// f(t) = a * t^2 + b * t + c
-// f(t-t_0) = a*(t-t_0)^2 + b*(t-t_0) + c
-//          = a*(t^2 - 2*t_0*t + t_0^2) + b*t - b*t_0 + c
-//          = a*t^2 - (2*a*t_0 + b)*t + a*t_0^2 - b*t_0 + c
-// is t_0^2 meaningful?
+// this discards information about manually-entered values.
 Accumulator.prototype.translate = function(t_1) {
-    var newPoly = [];
+    var t = (t_1-this.t_0)/this.scale;
+    var newK = [];
     for (var i = 0; i < this.k.length; i++) {
-        // TODO: support higher order translation
-        newPoly[i] = this.k[i];
+        newK[i] = this.evaluate(t, i);
     }
-    newPoly[0] = this.evaluateAtTime(t_1);
-    this.k = newPoly;
+    this.k = newK;
     this.t_0 = t_1;
 };
 
