@@ -1,5 +1,5 @@
-clockSkew = require('./clockSkew');
-Polynomial = require('./polynomial');
+var clockSkew = require('./clockSkew');
+var Polynomial = require('./polynomial');
 
 // Stateful class for managing a time-based formula
 function Accumulator(properties) {
@@ -7,7 +7,7 @@ function Accumulator(properties) {
         this[i] = properties[i];
     }
     this.t_0 = this.t_0 || Date.now();
-    this.poly = new Polynomial(this.poly);
+    this.poly = Polynomial(this.poly);
 }
 
 // default options
@@ -21,7 +21,7 @@ Accumulator.prototype.min = 0;
 Accumulator.prototype.reset = function(k) {
     var self = this;
     clockSkew.fetch(function(skew){
-        self.poly = new Polynomial(k);
+        self.poly = Polynomial(k);
         self.t_0 = Date.now() - skew;
     });
 }
@@ -49,9 +49,9 @@ Accumulator.prototype.progressAtTime = function(t_1) {
 
 // would like to support negative mods with floors
 // eg consume materials to produce products, without going below zero
-Accumulator.prototype.addPolynomial = function(mod) {
+Accumulator.prototype.addPolynomial = function(rhs) {
     var self = this;
-    var rhs = new Polynomial(mod)
+    rhs = Polynomial(rhs);
     if (rhs.isConstant()) { // bypass clock for constants
         self.poly = self.poly.addPolynomial(rhs);
         if (self.onChange) {
@@ -62,7 +62,8 @@ Accumulator.prototype.addPolynomial = function(mod) {
     clockSkew.fetch(function(skew){
         var t_1 = Date.now() - skew;
         var Dt = (t_1 - self.t_0) / self.scale;
-        self.poly = self.poly.translate(Dt).addPolynomial(rhs);
+        self.poly = self.poly.translate(Dt, this);
+        self.poly = self.poly.addPolynomial(rhs);
         self.t_0 = t_1;
 
         // TODO: emit a proper change event

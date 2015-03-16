@@ -26,16 +26,31 @@ function computeBinomialC(n, k) {
 // It is represented as an array of coefficients k[],
 // such that f(x) = k_i * x^i + ... + k_0
 function Polynomial(k) {
+    // support using the constructor to quickly ensure type.
     if (k instanceof Polynomial) {
-        this.k = k.k;
+        return k;
+    }
+    // support using the constructor without the 'new' keyword.
+    if (!(this instanceof Polynomial)) {
+        return new Polynomial(k);
     }
     else {
-        this.k = k || [0];
+        // initialization
+        this.k = k || [];
+        return this;
     }
 }
 
 Polynomial.prototype.toJSON = function() {
     return this.k;
+}
+
+Polynomial.prototype.clone = function() {
+    var newK = [];
+    for (var i = 0; i < this.k.length; i++) {
+        newK[i] = this.k[i];
+    }
+    return new Polynomial(newK);
 }
 
 Polynomial.prototype.degree = function() {
@@ -61,14 +76,20 @@ Polynomial.prototype.multiplyByScalar = function(s) {
     return new Polynomial(newK);
 };
 
-Polynomial.prototype.addPolynomial = function(rhs) {
-    var rhk = new Polynomial(rhs).k;
-    var newK = [];
-    var length = Math.max(this.k.length, rhk.length);
-    for (var i = 0; i < length; i++) {
-        newK[i] = (this.k[i] || 0) + (rhk[i] || 0);
+Polynomial.sum = function(polys) {
+    var k = [];
+    polys = polys || [];
+    for (var i = 0; i < polys.length; i++) {
+        var p = Polynomial(polys[i]);
+        for (var j = 0; j < p.k.length; j++) {
+            k[j] = (k[j] || 0) + p.k[j];
+        }
     }
-    return new Polynomial(newK);
+    return new Polynomial(k);
+};
+
+Polynomial.prototype.addPolynomial = function(rhs) {
+    return Polynomial.sum([this, rhs]);
 };
 
 // number of widgets at time t = evaluate(poly, t, 0)
@@ -103,15 +124,23 @@ Polynomial.prototype.evaluate = function(x, i, options) {
 };
 
 // Translate a function f(x) to a new origin: f(x + Dx).
-// TODO: discrete and batched behavior for this operation.
-Polynomial.prototype.translate = function(Dx) {
-    var result = new Polynomial();
+// ideally evaluate(t, 1) has the same result before and afterwards.
+Polynomial.prototype.translate = function(Dx, options) {
+    var currentRates = [];
     for (var i = 0; i < this.k.length; i++) {
-        var k_i = this.k[i];
-        var termToPower = evaluateBinomial(Dx, i).multiplyByScalar(k_i);
-        result = result.addPolynomial(termToPower);
+        currentRates[i] = this.evaluate(Dx, i, options);
     }
-    return result;
+    return new Polynomial(currentRates);
+
+    // this was causing the current rate to change
+    // var result = new Polynomial();// this.multiplyByScalar(-1);
+    // for (var i = 0; i < this.k.length; i++) {
+    //     var k_i = this.k[i];
+    //     // k_i * (x + Dx)^i
+    //     var termToPower = evaluateBinomial(Dx, i).multiplyByScalar(k_i);
+    //     result = result.addPolynomial(termToPower);
+    // }
+    // return result;
 };
 
 module.exports = Polynomial;
