@@ -62,7 +62,7 @@ Accumulator.prototype.addPolynomial = function(rhs) {
     clockSkew.fetch(function(skew){
         var t_1 = Date.now() - skew;
         var Dt = (t_1 - self.t_0) / self.scale;
-        self.poly = self.poly.translate(Dt, this);
+        self.poly = self.poly.translate(Dt, self);
         self.poly = self.poly.addPolynomial(rhs);
         self.t_0 = t_1;
 

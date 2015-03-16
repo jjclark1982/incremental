@@ -108,11 +108,10 @@ Polynomial.prototype.evaluate = function(x, i, options) {
     }
     var j = i + 1;
     var k_j = this.evaluate(x, j, options);
-    var k_i = this.k[i] + k_j*x;
-    if (options.discrete && i != 0) {
-        // fractional amounts are useful for translation, so keep them at the very end
-        k_i = Math.floor(k_i);
+    if (options.discrete) {
+        k_j = Math.floor(k_j);
     }
+    var k_i = this.k[i] + k_j*x;
     if (i == 0) {
         var max = options.max == null ?  Infinity : options.max;
         var min = options.min == null ? -Infinity : options.min;
