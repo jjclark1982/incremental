@@ -1,5 +1,5 @@
 React = require('react')
-AccumulatorInspector = require('accumulator-inspector')
+AccumulatorView = require('accumulator/view')
 FPSControl = require('fps-control')
 
 IncrementalApp = React.createClass({
@@ -10,7 +10,7 @@ IncrementalApp = React.createClass({
 
         return <div>
             <h1>Incremental</h1>
-            <AccumulatorInspector saveKey="accumulator" />
+            <AccumulatorView saveKey="accumulator" />
             <FPSControl />
         </div>
 })

@@ -1,11 +1,11 @@
 React = require('react')
-Accumulator = require('accumulator')
-PolynomialView = require('polynomial-view')
-clockSkew = require('clockSkew')
+Accumulator = require('accumulator/model')
+PolynomialView = require('polynomial/view')
+clockSkew = require('clock-skew')
 clock = require('clock')
 
-AccumulatorInspector = React.createClass({
-    displayName: 'AccumulatorInspector'
+AccumulatorView = React.createClass({
+    displayName: 'AccumulatorView'
 
     getInitialState: ->
         return {
@@ -122,4 +122,4 @@ AccumulatorInspector = React.createClass({
         </div>
 })
 
-module.exports = AccumulatorInspector
+module.exports = AccumulatorView

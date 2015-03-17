@@ -21,7 +21,7 @@ for (var key in env) {
 
 var config = {
     context: path.join(__dirname, 'web_modules'),
-    entry: ['./main.coffee'],
+    entry: ['website/entry.coffee'],
     output: {
         path: path.join(__dirname, 'public'),
         filename: 'bundle.js'

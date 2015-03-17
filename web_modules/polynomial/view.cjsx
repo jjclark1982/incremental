@@ -29,8 +29,8 @@ Term = React.createClass({
         return <span> {op} {coefficient}<var>{variable}</var><sup>{exponent}</sup></span>
 })
 
-Polynomial = React.createClass({
-    displayName: 'Polynomial'
+PolynomialView = React.createClass({
+    displayName: 'PolynomialView'
 
     render: ->
         variable = @props.variable or 'x'
@@ -41,10 +41,10 @@ Polynomial = React.createClass({
             term = <Term key={i} k={k_i} exp={i} variable={variable} initial={initial}/>
             terms.push(term)
         if terms.length is 0
-            terms.push('0')
+            terms.push(<Term key={0} k={0} initial={true}/>)
         terms.reverse()
 
         return <span>{terms}</span>
 })
 
-module.exports = Polynomial
+module.exports = PolynomialView
