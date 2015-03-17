@@ -3,6 +3,7 @@ var webpack = require('webpack');
 var autoprefixer = require('autoprefixer-core');
 var atImport = require('postcss-import');
 var cssWring = require('csswring');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 // client environment configuration.
 // (these default values will be overridden by by the current environment)
@@ -20,11 +21,13 @@ for (var key in env) {
 // webpack configuration
 
 var config = {
-    context: path.join(__dirname, 'web_modules'),
-    entry: ['website/entry.coffee'],
+    context: __dirname,
+    entry: {
+        main: 'website/main.coffee'
+    },
     output: {
         path: path.join(__dirname, 'public'),
-        filename: 'bundle.js'
+        filename: '[name].js'
     },
     resolveLoader: {
         modulesDirectories: ['web_modules','node_modules']
@@ -34,7 +37,6 @@ var config = {
     },
     module: {
         loaders: [
-            { test: /\.css$/, loaders: ['style', 'css', 'postcss'] },
             { test: /\.cjsx$/, loaders: ['react-hot', 'coffee', 'cjsx'] },
             { test: /\.coffee$/, loader: 'coffee' }
         ]
@@ -54,10 +56,19 @@ if (process.env.NODE_ENV === 'production') {
     // note that the react library will also be optimized due to the DefinePlugin.
     config.plugins.push(new webpack.optimize.UglifyJsPlugin());
     config.postcss.push(cssWring);
+    config.plugins.push(new ExtractTextPlugin('[name]-style.css'));
+    config.module.loaders.push({
+        test: /\.css$/,
+        loader: ExtractTextPlugin.extract("style-loader", "css-loader!postcss-loader")
+    });
 }
 else {
     config.devtool = 'source-map';
     config.debug = true;
+    config.module.loaders.push({
+        test: /\.css$/,
+        loaders: ['style', 'css', 'postcss']
+    });
 }
 
 // webpack-dev-server configuration

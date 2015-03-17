@@ -2,7 +2,7 @@ console.log('Loaded app with config:', process.env)
 
 require('file?name=index.html!./index.html')
 require('file?name=CNAME!./CNAME')
-require('purecss/pure.css') # this flickers, we may want to put it in a separate file.
+require('./style.css')
 
 init = ->
     React = require('react')
