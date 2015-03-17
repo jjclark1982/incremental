@@ -2,7 +2,6 @@
 <head>
     <title>Incremental</title>
     <link rel="stylesheet" type="text/css" href="main-style.css">
-    <link rel="script" type="text/javascript" href="main.js">
 </head>
 <body>
     <span id="forkongithub"><a href="https://github.com/jjclark1982/incremental">Fork me on GitHub</a></span>
@@ -14,39 +13,7 @@
             Here are the <a href="http://www.enable-javascript.com/" target="_blank">
             instructions how to enable JavaScript in your web browser</a>.
         </noscript>
-        <script>
-            (function(d, p){
-                p = d.createElement('p');
-                p.innerHTML = '<div>Loading App...</div>';
-                d.body.appendChild(p);
-
-                var links = d.querySelectorAll('link[rel="script"]');
-                var linksLoaded = 0;
-                Array.prototype.forEach.call(links, function(link){
-                    var progress = d.createElement('progress');
-                    var xhr = new XMLHttpRequest();
-                    xhr.onprogress = function(e){
-                        if (!e.total) return;
-                        if (!progress.parentNode) {
-                            p.appendChild(progress);
-                        }
-                        progress.value = (e.loaded / e.total)*100;
-                    };
-                    xhr.onreadystatechange = function(e, s){
-                        if (this.readyState != 4) return;
-                        s = d.createElement('script');
-                        s.type = link.type;
-                        s.src = link.href;
-                        s.async = true;
-                        link.parentNode.insertBefore(s, link.nextSibling);
-                        if (++linksLoaded == links.length) {
-                            p.remove();
-                        }
-                    };
-                    xhr.open('GET', link.href, true);
-                    xhr.send();
-                });
-            })(document);
-        </script>
+        <script>document.write("Loading App...");</script>
     </div>
+    <script type="text/javascript" src="main.js"></script>
 </body>
