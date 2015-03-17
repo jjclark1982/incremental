@@ -1,6 +1,6 @@
 React = require('react')
-AccumulatorInspector = require('./accumulator-inspector')
-FPSControl = require('./fps-control')
+AccumulatorInspector = require('accumulator-inspector')
+FPSControl = require('fps-control')
 
 IncrementalApp = React.createClass({
     displayName: 'IncrementalApp'

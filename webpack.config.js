@@ -20,14 +20,14 @@ for (var key in env) {
 // webpack configuration
 
 var config = {
-    context: path.join(__dirname, 'src'),
+    context: path.join(__dirname, 'web_modules'),
     entry: ['./main.coffee'],
     output: {
         path: path.join(__dirname, 'public'),
         filename: 'bundle.js'
     },
     resolveLoader: {
-        modulesDirectories: ['node_modules']
+        modulesDirectories: ['web_modules','node_modules']
     },
     resolve: {
         extensions: ['', '.js', '.cjsx', '.coffee']
@@ -45,7 +45,7 @@ var config = {
         new webpack.DefinePlugin({'process.env': env})
     ],
     postcss: [
-        atImport({path: path.join(__dirname, 'src')}),
+        atImport({path: path.join(__dirname, 'web_modules')}),
         autoprefixer({browsers: '> 0.1%'})
     ]
 };

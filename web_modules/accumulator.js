@@ -1,5 +1,5 @@
-var clockSkew = require('./clockSkew');
-var Polynomial = require('./polynomial');
+var clockSkew = require('clockSkew');
+var Polynomial = require('polynomial');
 
 // Stateful class for managing a time-based formula
 function Accumulator(properties) {

@@ -1,5 +1,5 @@
 React = require('react')
-clock = require('./clock')
+clock = require('clock')
 
 style = {
     display: 'inline-block',

@@ -1,5 +1,5 @@
-{request} = require('./util')
-clock = require('./clock')
+{request} = require('util')
+clock = require('clock')
 
 skew = null
 callbacks = null

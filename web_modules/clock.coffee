@@ -1,4 +1,4 @@
-EventEmitter = require('./event-emitter')
+EventEmitter = require('event-emitter')
 
 class Clock extends EventEmitter
     constructor: (options)->

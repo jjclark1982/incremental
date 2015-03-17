@@ -6,7 +6,7 @@ require('purecss/pure.css') # this flickers, we may want to put it in a separate
 
 init = ->
     React = require('react')
-    App = require('./app')
+    App = require('app')
 
     contentEl = document.getElementById('content')
     if !contentEl

@@ -9,7 +9,7 @@ To install dependencies:
     export PATH="$PATH:node_modules/.bin"
     npm install
 
-To compile once, from `src/` to `public/`:
+To compile once, from `web_modules/` to `public/`:
 
     webpack
 

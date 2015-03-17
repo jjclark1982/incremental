@@ -1,8 +1,8 @@
 React = require('react')
-Accumulator = require('./accumulator')
-PolynomialView = require('./polynomial-view')
-clockSkew = require('./clockSkew')
-clock = require('./clock')
+Accumulator = require('accumulator')
+PolynomialView = require('polynomial-view')
+clockSkew = require('clockSkew')
+clock = require('clock')
 
 AccumulatorInspector = React.createClass({
     displayName: 'AccumulatorInspector'
