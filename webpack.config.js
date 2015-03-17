@@ -83,8 +83,8 @@ config.devServer = {
 };
 if (require.cache[require.resolve('webpack-dev-server')]) {
     // we appear to be running the dev server. enable hot reloading.
-    config.entry.push('webpack/hot/dev-server');
-    config.entry.push('webpack-dev-server/client?http://'+config.devServer.host+':'+config.devServer.port);
+    config.entry['HMR'] = 'webpack/hot/dev-server';
+    config.entry['WDS'] = 'webpack-dev-server/client?http://'+config.devServer.host+':'+config.devServer.port;
     config.plugins.push(new webpack.HotModuleReplacementPlugin());
 }
 
