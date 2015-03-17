@@ -6,9 +6,8 @@ IncrementalApp = React.createClass({
     displayName: 'IncrementalApp'
 
     render: ->
-        # this is not usually visible
-
         return <div>
+            <span id="forkongithub"><a href="https://github.com/jjclark1982/incremental">Fork me on GitHub</a></span>
             <h1>Incremental</h1>
             <AccumulatorView saveKey="accumulator" />
             <FPSControl />

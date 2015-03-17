@@ -23,11 +23,11 @@ for (var key in env) {
 var config = {
     context: __dirname,
     entry: {
-        main: 'website/main.coffee'
+        main: 'main/entry'
     },
     output: {
         path: path.join(__dirname, 'public'),
-        filename: '[name].js'
+        filename: '[name]-bundle.js'
     },
     resolveLoader: {
         modulesDirectories: ['web_modules','node_modules']
@@ -65,6 +65,7 @@ if (process.env.NODE_ENV === 'production') {
 else {
     config.devtool = 'source-map';
     config.debug = true;
+    config.plugins.push(new ExtractTextPlugin('[name]-style.css'));
     config.module.loaders.push({
         test: /\.css$/,
         loaders: ['style', 'css', 'postcss']
