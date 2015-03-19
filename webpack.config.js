@@ -23,7 +23,7 @@ for (var key in env) {
 var config = {
     context: __dirname,
     entry: {
-        main: 'main/entry'
+        main: ['main/entry']
     },
     output: {
         path: path.join(__dirname, 'public'),
@@ -75,6 +75,8 @@ else {
 // webpack-dev-server configuration
 
 config.devServer = {
+    host: process.env.HOST || 'localhost',
+    port: process.env.PORT || '8080',
     contentBase: config.output.path,
     publicPath: '/',
     hot: true,
@@ -82,8 +84,8 @@ config.devServer = {
 };
 if (require.cache[require.resolve('webpack-dev-server')]) {
     // we appear to be running the dev server. enable hot reloading.
-    config.entry['HMR'] = 'webpack/hot/dev-server';
-    config.entry['WDS'] = 'webpack-dev-server/client?http://'+config.devServer.host+':'+config.devServer.port;
+    config.entry.main.push('webpack/hot/dev-server');
+    config.entry.main.push('webpack-dev-server/client?http://'+config.devServer.host+':'+config.devServer.port)
     config.plugins.push(new webpack.HotModuleReplacementPlugin());
 }
 
