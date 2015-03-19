@@ -1,7 +1,8 @@
 console.log('Loaded app with config:', process.env)
 
-require('file?name=index.html!./index.html')
-require('file?name=CNAME!./CNAME')
+# window.filename = require('file?name=[name].[ext]!./index.html')
+require('./index.jade')
+require('file?name=[name]!./CNAME')
 require('./style.css')
 
 React = require('react')

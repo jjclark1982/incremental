@@ -38,7 +38,8 @@ var config = {
     module: {
         loaders: [
             { test: /\.cjsx$/, loaders: ['react-hot', 'coffee', 'cjsx'] },
-            { test: /\.coffee$/, loader: 'coffee' }
+            { test: /\.coffee$/, loader: 'coffee' },
+            { test: /\.jade$/, loaders: ['file?name=[name].html', 'template-html-loader?engine=jade&raw=true&pretty=  '] }
         ]
     },
     plugins: [
@@ -56,16 +57,16 @@ if (process.env.NODE_ENV === 'production') {
     // note that the react library will also be optimized due to the DefinePlugin.
     config.plugins.push(new webpack.optimize.UglifyJsPlugin());
     config.postcss.push(cssWring);
-    config.plugins.push(new ExtractTextPlugin('[name]-style.css'));
+    var extractCSS = new ExtractTextPlugin('[name]-style.css');
+    config.plugins.push(extractCSS);
     config.module.loaders.push({
         test: /\.css$/,
-        loader: ExtractTextPlugin.extract("style-loader", "css-loader!postcss-loader")
+        loader: extractCSS.extract("style-loader", "css-loader!postcss-loader")
     });
 }
 else {
     config.devtool = 'source-map';
     config.debug = true;
-    config.plugins.push(new ExtractTextPlugin('[name]-style.css'));
     config.module.loaders.push({
         test: /\.css$/,
         loaders: ['style', 'css', 'postcss']
