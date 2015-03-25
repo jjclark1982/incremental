@@ -4,6 +4,9 @@ PolynomialView = require('polynomial/view')
 clockSkew = require('clock-skew')
 clock = require('clock')
 
+require('chart.js')
+LineChart = require('react-chartjs').Line
+
 AccumulatorView = React.createClass({
     displayName: 'AccumulatorView'
 
@@ -11,6 +14,13 @@ AccumulatorView = React.createClass({
         return {
             accumulator: new Accumulator()
             value: 0
+            chartData: {
+                labels: [0,0,0,0,0,0,0,0,0,0]
+                datasets: [
+                    label: "Value"
+                    data: [0,0,0,0,0,0,0,0,0,0]
+                ]
+            }
         }
 
     componentWillMount: ->
@@ -28,12 +38,19 @@ AccumulatorView = React.createClass({
     setStateFromAccumulator: ->
         clockSkew.fetch((skew)=>
             t = Date.now() - skew
+            value = Math.floor(@accumulator.evaluateAtTime(t))
+            chartData = @state.chartData
+            chartData.datasets[0].data.shift()
+            chartData.datasets[0].data.push(value)
+            chartData.labels.shift()
+            chartData.labels.push(t)
             @setState({
                 accumulator: @accumulator
                 t: t
-                value: Math.floor(@accumulator.evaluateAtTime(t))
+                value: value
                 rate: @accumulator.rateAtTime(t)
                 progress: @accumulator.progressAtTime(t)
+                chartData: chartData
             })
         )
 
@@ -74,6 +91,10 @@ AccumulatorView = React.createClass({
     render: ->
         window.lastAI = this
         variable = 't'
+
+        chartOptions = {
+            bezierCurve: false
+        }
 
         if @state.progress
             progress = <progress value={@state.progress} max="1">{@state.progress*100|0} %</progress>
@@ -119,6 +140,7 @@ AccumulatorView = React.createClass({
                 <label className="pure-checkbox"><input type="checkbox" onChange={@toggleDiscrete} checked={@state.accumulator.discrete} /> discrete</label>{' '}
                 <label className="pure-checkbox"><input type="checkbox" onChange={@toggleBatched} checked={@state.accumulator.batched} /> batched</label>
             </p>
+            <LineChart data={@state.chartData} options={chartOptions} width={600} height={250}/>
         </div>
 })
 
