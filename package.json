@@ -8,7 +8,7 @@
     "start": "webpack-dev-server ${PORT:+--port $PORT}",
     "build": "webpack",
     "clean": "rm -rf public",
-    "test": "echo \"It should compile without errors\" && webpack --bail"
+    "test": "test/run.coffee"
   },
   "author": "Jesse Clark <jjclark1982@gmail.com>",
   "license": "ISC",
@@ -23,6 +23,7 @@
     "csswring": "^2.0.0",
     "extract-text-webpack-plugin": "^0.3.8",
     "file-loader": "^0.8.1",
+    "glob": "^5.0.5",
     "postcss-import": "^4.1.0",
     "postcss-loader": "^0.2.0",
     "purecss": "^0.5.0",
@@ -33,6 +34,9 @@
     "webpack": "^1.4.13"
   },
   "devDependencies": {
+    "chai": "^2.2.0",
+    "mocha": "^2.2.4",
+    "mocha-loader": "^0.7.1",
     "webpack-dev-server": "^1.7.0"
   }
 }

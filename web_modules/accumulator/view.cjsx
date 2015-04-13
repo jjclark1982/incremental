@@ -24,7 +24,8 @@ AccumulatorView = React.createClass({
         }
 
     componentWillMount: ->
-        saveData = JSON.parse(localStorage.getItem(@props.saveKey))
+        try
+            saveData = JSON.parse(localStorage.getItem(@props.saveKey))
         @accumulator = new Accumulator(saveData)
         @accumulator.onChange = =>
             @setStateFromAccumulator()

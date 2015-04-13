@@ -1,8 +1,9 @@
-console.log('Loaded app with config:', process.env)
+# console.log('Loaded app with config:', process.env)
 
-require('file?name=index.html!./index.html')
-require('file?name=CNAME!./CNAME')
-require('./style.css')
+try
+    require('file?name=index.html!./index.html')
+    require('file?name=CNAME!./CNAME')
+    require('./style.css')
 
 React = require('react')
 App = require('./app')

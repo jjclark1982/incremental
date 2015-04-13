@@ -72,6 +72,19 @@ else {
     });
 }
 
+// automatically add all 'test.*' files to the 'test' entrypoint
+
+try {
+    require.resolve('mocha');
+    config.entry.test = ['mocha!test/entry'];
+    var testFiles = require('./test');
+    for (var i = 0; i < testFiles.length; i++) {
+        config.entry.test.push(testFiles[i]);
+    }
+} catch (e) {
+    // don't add tests if mocha is missing
+}
+
 // webpack-dev-server configuration
 
 config.devServer = {
@@ -84,8 +97,10 @@ config.devServer = {
 };
 if (require.cache[require.resolve('webpack-dev-server')]) {
     // we appear to be running the dev server. enable hot reloading.
-    config.entry.main.push('webpack/hot/dev-server');
-    config.entry.main.push('webpack-dev-server/client?http://'+config.devServer.host+':'+config.devServer.port)
+    for (var i in config.entry) {
+        config.entry[i].push('webpack/hot/dev-server');
+        config.entry[i].push('webpack-dev-server/client?http://'+config.devServer.host+':'+config.devServer.port)
+    }
     config.plugins.push(new webpack.HotModuleReplacementPlugin());
 }
 
