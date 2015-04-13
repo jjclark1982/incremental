@@ -14,11 +14,15 @@ describe 'Polynomial', ->
         p7 = new Polynomial([null,2])
 
     it 'should clone other polynomials', ->
-        p = new Polynomial()
+        p = new Polynomial([1,2,3])
         p2 = Polynomial(p)
         expect(p2).to.equal(p)
 
-    it 'should serialize and deserialize to the same value', ->
+        p3 = p.clone()
+        expect(p3).not.to.equal(p)
+        expect(p3).to.deep.equal(p)
+
+    it 'should serialize and deserialize without loss', ->
         p = new Polynomial([1,2,3])
         json = JSON.stringify(p)
         obj = JSON.parse(json)
@@ -30,98 +34,147 @@ describe 'Polynomial', ->
         p2 = p.multiplyByScalar(4)
         value = p.evaluate(5)
         expect(value).to.equal(3*5*5 + 2*5 + 1)
+
         value2 = p2.evaluate(5)
         expect(value2).to.equal(4*value)
 
-    it 'should identify a constant formula', ->
-        p = new Polynomial([1,0])
-        expect(p.isConstant()).to.be.true
-        degree = p.degree()
-        expect(degree).to.equal(0)
+    it 'should sum multiple polynomials', ->
+        p1 = new Polynomial([1,2,3])
+        p2 = new Polynomial([0,4,5,6])
+        expected = new Polynomial([1,6,8,6])
 
-    it 'should evaluate a constant formula', ->
-        p = new Polynomial([2])
-        expect(p.evaluate(0)).to.equal(2)
-        expect(p.evaluate(5)).to.equal(2)
-        expect(p.evaluate(5.1),0,{batched: true}).to.equal(2)
-        expect(p.evaluate(5.1),0,{discrete: true}).to.equal(2)
+        p3 = Polynomial.sum([p1,p2])
+        expect(p3).to.deep.equal(expected)
 
-    it 'should translate a constant formula', ->
-        p = new Polynomial([3])
-        p2 = p.translate(4)
-        value = p2.evaluate(5)
-        expect(value).to.equal(3)
+        p4 = p1.addPolynomial(p2)
+        expect(p4).to.deep.equal(expected)
 
-    it 'should identify an affine formula', ->
-        p = new Polynomial([2,3,0])
-        degree = p.degree()
-        expect(degree).to.equal(1)
+    describe 'should identify the degree of a formula', ->
+        it 'constant', ->
+            p = new Polynomial([1,0])
+            expect(p.isConstant()).to.be.true
+            expect(p.degree()).to.equal(0)
 
-    it 'should evaluate an affine formula', ->
-        p = new Polynomial([2,3])
-        value = p.evaluate(4)
-        expect(value).to.equal(3*4 + 2)
+        it 'affine', ->
+            p = new Polynomial([2,1,null])
+            expect(p.degree()).to.equal(1)
 
-    it 'should evaluate an affine formula in batched mode', ->
-        p = new Polynomial([2,3])
-        value = p.evaluate(4)
-        value2 = p.evaluate(4.9, 0, {batched: true})
-        expect(value2).to.equal(value)
+        it 'quadratic', ->
+            p = new Polynomial([3,2,1,])
+            expect(p.degree()).to.equal(2)
 
-    it 'should evaluate an affine formula in discrete mode', ->
-        p = new Polynomial([2,3])
-        value = p.evaluate(4.5)
-        value2 = p.evaluate(4.5, 0, {discrete: true})
-        expect(value2).to.equal(value)
+        it 'cubic', ->
+            p = new Polynomial([4,3,2,1])
+            expect(p.degree()).to.equal(3)
 
-    it 'should translate an affine formula', ->
-        p = new Polynomial([2,3])
-        p2 = p.translate(5)
-        value = p2.evaluate(4)
-        expect(value).to.equal(3*(4+5) + 2)
+    describe 'should evaluate a continuous formula', ->
+        it 'constant', ->
+            p = new Polynomial([2])
+            expect(p.evaluate(0)).to.equal(2)
+            expect(p.evaluate(5)).to.equal(2)
+            expect(p.evaluate(5.1),0,{batched: true}).to.equal(2)
+            expect(p.evaluate(5.1),0,{discrete: true}).to.equal(2)
 
-    it 'should evaluate a quadratic formula', ->
-        p = new Polynomial([2,3,4])
-        value = p.evaluate(5)
-        expect(value).to.equal(4*5*5 + 3*5 + 2)
+        it 'affine', ->
+            p = new Polynomial([2,3])
+            value = p.evaluate(4)
+            expect(value).to.equal(3*4 + 2)
 
-    it 'should evaluate a quadratic formula in batched mode', ->
-        p = new Polynomial([2,3,4])
-        value = p.evaluate(5)
-        value2 = p.evaluate(5.9, 0, {batched: true})
-        expect(value2).to.equal(value)
+        it 'quadratic', ->
+            p = new Polynomial([2,3,4])
+            value = p.evaluate(5)
+            expect(value).to.equal(4*5*5 + 3*5 + 2)
 
-    it 'should evaluate a quadratic formula in discrete mode', ->
-        p = new Polynomial([2,3,4])
-        x = 5.7
-        value = p.evaluate(x, 0, {discrete: true})
-        expect(value).to.equal((Math.floor(4*x)+3)*x + 2)
+        it 'cubic', ->
+            p = new Polynomial([4,3,2,1])
+            value = p.evaluate(5)
+            expect(value).to.equal(5*5*5 + 2*5*5 + 3*5 + 4)
 
-    it 'should translate a quadratic formula', ->
-        p = new Polynomial([3,2,1])
-        value = p.evaluate(5)
-        expect(value).to.equal(5*5 + 2*5 + 3)
+    describe 'should evaluate a bounded formula', ->
+        it 'min', ->
+            p = new Polynomial([3,2,1])
+            value = p.evaluate(2, 0, {min: 100})
+            expect(value).to.equal(100)
 
-        p2 = p.translate(5)
-        value2 = p2.evaluate(0)
-        expect(value2).to.equal(value)
+        it 'max', ->
+            p = new Polynomial([3,2,1])
+            value = p.evaluate(200, 0, {max: 100})
+            expect(value).to.equal(100)
 
-        value3 = p2.evaluate(3)
-        expect(value3).to.equal(8*8 + 2*8 + 3)
+            p2 = new Polynomial([3,2,1])
+            value2 = p2.evaluate(200, 0, {max: Infinity})
+            expect(value2).to.equal(200*200 + 2*200 + 3)
 
-    it 'should evaluate a cubic formula', ->
-        p = new Polynomial([4,3,2,1])
-        value = p.evaluate(5)
-        expect(value).to.equal(5*5*5 + 2*5*5 + 3*5 + 4)
+            value3 = p2.evaluate(200, 0, {max: null})
+            expect(value3).to.equal(200*200 + 2*200 + 3)
 
-    it 'should translate a cubic formula', ->
-        p = new Polynomial([4,3,2,1])
-        value = p.evaluate(5)
-        expect(value).to.equal(5*5*5 + 2*5*5 + 3*5 + 4)
+    describe 'should evaluate a batched formula', ->
+        it 'constant', ->
+            p = new Polynomial([2])
+            expect(p.evaluate(3.9),0,{batched: true}).to.equal(2)
 
-        p2 = p.translate(5)
-        value2 = p2.evaluate(0)
-        expect(value2).to.equal(value)
+        it 'affine', ->
+            p = new Polynomial([2,3])
+            value = p.evaluate(4)
+            value2 = p.evaluate(4.9, 0, {batched: true})
+            expect(value2).to.equal(value)
 
-        value3 = p2.evaluate(3)
-        expect(value3).to.equal(8*8*8 + 2*8*8 + 3*8 + 4)
+        it 'quadratic', ->
+            p = new Polynomial([2,3,4])
+            value = p.evaluate(5)
+            value2 = p.evaluate(5.9, 0, {batched: true})
+            expect(value2).to.equal(value)
+
+    describe 'should evaluate a discrete formula', ->
+        it 'constant', ->
+            p = new Polynomial([2])
+            expect(p.evaluate(5.5),0,{discrete: true}).to.equal(2)
+
+        it 'affine', ->
+            p = new Polynomial([2,3])
+            value = p.evaluate(4.5)
+            value2 = p.evaluate(4.5, 0, {discrete: true})
+            expect(value2).to.equal(value)
+
+        it 'quadratic', ->
+            p = new Polynomial([2,3,4])
+            x = 5.7
+            value = p.evaluate(x, 0, {discrete: true})
+            expect(value).to.equal((Math.floor(4*x)+3)*x + 2)
+
+    describe 'should translate to a new origin', ->
+        it 'constant', ->
+            p = new Polynomial([3])
+            p2 = p.translate(4)
+            value = p2.evaluate(5)
+            expect(value).to.equal(3)
+
+        it 'affine', ->
+            p = new Polynomial([2,3])
+            p2 = p.translate(5)
+            value = p2.evaluate(3)
+            expect(value).to.equal(3*8 + 2)
+
+        it 'quadratic', ->
+            p = new Polynomial([3,2,1])
+            value = p.evaluate(5)
+            expect(value).to.equal(5*5 + 2*5 + 3)
+
+            p2 = p.translate(5)
+            value2 = p2.evaluate(0)
+            expect(value2).to.equal(value)
+
+            value3 = p2.evaluate(3)
+            expect(value3).to.equal(8*8 + 2*8 + 3)
+
+        it 'cubic', ->
+            p = new Polynomial([4,3,2,1])
+            value = p.evaluate(5)
+            expect(value).to.equal(5*5*5 + 2*5*5 + 3*5 + 4)
+
+            p2 = p.translate(5)
+            value2 = p2.evaluate(0)
+            expect(value2).to.equal(value)
+
+            value3 = p2.evaluate(3)
+            expect(value3).to.equal(8*8*8 + 2*8*8 + 3*8 + 4)
