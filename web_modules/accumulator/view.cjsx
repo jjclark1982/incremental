@@ -39,19 +39,21 @@ AccumulatorView = React.createClass({
 
     setStateFromAccumulator: ->
         clockSkew.fetch((skew)=>
-            t = Date.now() - skew
-            value = Math.floor(@accumulator.evaluateAtTime(t))
+            t_1 = Date.now() - skew
+            t = (t_1 - @accumulator.t_0) / @accumulator.scale
+            value = Math.floor(@accumulator.evaluateAtTime(t_1))
             chartData = @state.chartData
             chartData.datasets[0].data.shift()
             chartData.datasets[0].data.push(value)
             chartData.labels.shift()
-            chartData.labels.push(t)
+            chartData.labels.push(t_1)
             @setState({
                 accumulator: @accumulator
+                t_1: t_1
                 t: t
                 value: value
-                rate: @accumulator.rateAtTime(t)
-                progress: @accumulator.progressAtTime(t)
+                rate: @accumulator.rateAtTime(t_1)
+                progress: @accumulator.progressAtTime(t_1)
                 chartData: chartData
                 skew: skew
             })
@@ -120,7 +122,7 @@ AccumulatorView = React.createClass({
             </p>
             <p className="math">
                 <var>t</var> = <var>t</var><sub>1</sub> &ndash; <var>t</var><sub>0</sub> = 
-                <Numeral value={(@state.t - @state.accumulator.t_0) / @state.accumulator.scale}/> ticks
+                <Numeral value={@state.t} format='0,0[.][0]'/> ticks
             </p>
             <p className="math">
                 Current value: 

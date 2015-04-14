@@ -15,9 +15,11 @@ Numeral = React.createClass({
         n = numbro(@props.value)
         magnitude = Math.abs(@props.value)
 
-        if magnitude < 10
+        if @props.format?
+            display = n.format(@props.format)
+        else if magnitude < 10
             display = n.format('0[.][000]')
-        if magnitude < 100
+        else if magnitude < 100
             display = n.format('0[.][00]')
         else if magnitude < 1000
             display = n.format('0[.]0')
