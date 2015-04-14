@@ -5,30 +5,48 @@ skew = null
 callbacks = null
 
 fetch = (callback)->
-    if skew
-        return callback(skew)
+    if skew isnt null
+        return callback?(skew)
 
-    if callbacks
+    if callbacks isnt null
         callbacks.push(callback)
         return
 
     skew = null
     callbacks = [callback]
 
+    handleError = (error)->
+        reportResults(NaN)
+
+    reportResults = (value)->
+        skew = value
+        for callback in callbacks
+            callback?(skew)
+        callbacks = null
+
     clientTime = Date.now()
     request(document.location, {
         method: 'HEAD',
         headers: {'Cache-Control': 'no-cache'},
+        onerror: handleError
         onload: ->
-            if (skew != null || this.status == 0)
+            # already answered
+            if skew isnt null
                 return
 
-            serverTime = new Date(this.getResponseHeader('date'))
-            skew = (Date.now()+clientTime)/2 - serverTime
+            # something wrong
+            if @status is 0
+                return handleError()
 
-            for callback in callbacks
-                callback(skew)
-            callbacks = null
+            # clientTime = (Date.now() + clientTime)/2
+            clientTime = Date.now()
+            serverTime = new Date(this.getResponseHeader('date'))
+
+            # server time not supported
+            if !serverTime
+                return reportResults(0)
+
+            reportResults(clientTime - serverTime)
     })
 
 invalidate = ->
@@ -43,3 +61,5 @@ module.exports = {
     fetch: fetch
     invalidate: invalidate
 }
+
+window.clockSkew = module.exports
