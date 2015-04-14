@@ -1,4 +1,5 @@
 React = require('react')
+Numeral = require('numeral')
 
 Term = React.createClass({
     displayName: 'Term'
@@ -25,6 +26,9 @@ Term = React.createClass({
 
         if @props.exp > 1
             exponent = @props.exp
+
+        if typeof coefficient isnt 'string'
+            coefficient = <Numeral value={coefficient}/>
 
         return <span> {op} {coefficient}<var>{variable}</var><sup>{exponent}</sup></span>
 })

@@ -1,6 +1,7 @@
 React = require('react')
 Accumulator = require('accumulator/model')
 PolynomialView = require('polynomial/view')
+Numeral = require('numeral')
 clockSkew = require('clock-skew')
 clock = require('clock')
 
@@ -102,30 +103,31 @@ AccumulatorView = React.createClass({
 
         return <div>
             <p className="math">
-                <var>t</var><sub>0</sub>{' = '}
+                <var>t</var><sub>0</sub> = 
                 {(new Date(@state.accumulator.t_0)).toString()}
             </p>
             <p className="math">
-                <var>t</var><sub>1</sub>{' = '}
+                <var>t</var><sub>1</sub> = 
                 {(new Date()).toString()}
             </p>
             <p className="math">
-                Time scale: 1 tick = {@state.accumulator.scale} ms
+                Time scale: 1 tick = 
+                <Numeral value={@state.accumulator.scale}/> ms
             </p>
             <p className="math">
-                <var>t</var> = <var>t</var><sub>1</sub> &ndash; <var>t</var><sub>0</sub>{' = '}
-                {(@state.t - @state.accumulator.t_0)/ @state.accumulator.scale} ticks
+                <var>t</var> = <var>t</var><sub>1</sub> &ndash; <var>t</var><sub>0</sub> = 
+                <Numeral value={(@state.t - @state.accumulator.t_0) / @state.accumulator.scale}/> ticks
             </p>
             <p className="math">
-                Current value:{' '}
-                <var>f</var>(<var>t</var>){' = '}
-                <PolynomialView poly={@accumulator.poly} variable={variable} />{' = '}
-                {@state.value}
+                Current value: 
+                <var>f</var>(<var>t</var>) = 
+                <PolynomialView poly={@accumulator.poly} variable={variable} /> = 
+                <Numeral value={@state.value}/>
             </p>
             <p className="math">
-                Current rate:{' '}
-                <var>f&prime;</var>(<var>t</var>){' = '}
-                {@state.rate} per tick
+                Current rate: 
+                <var>f&prime;</var>(<var>t</var>) = 
+                <Numeral value={@state.rate}/> per tick
             </p>
             <p className="math">
                 Progress: {progress}
