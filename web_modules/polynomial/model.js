@@ -122,24 +122,18 @@ Polynomial.prototype.evaluate = function(x, i, options) {
     }
 };
 
-// Translate a function f(x) to a new origin: f(x + Dx).
-// ideally evaluate(t, 1) has the same result before and afterwards.
-Polynomial.prototype.translate = function(Dx, options) {
-    var currentRates = [];
+// Translate a function f(x) to a new origin:
+// F(x) == f(x + Δx)
+// F‘(x) == f‘(x + Δx)
+Polynomial.prototype.translate = function(Δx, options) {
+    var terms = [];
     for (var i = 0; i < this.k.length; i++) {
-        currentRates[i] = this.evaluate(Dx, i, options);
+        var k_i = this.k[i];
+        // k_i * (x + Δx)^i
+        var termToPower = evaluateBinomial(Δx, i).multiplyByScalar(k_i);
+        terms.push(termToPower);
     }
-    return new Polynomial(currentRates);
-
-    // this was causing the current rate to change
-    // var result = new Polynomial();// this.multiplyByScalar(-1);
-    // for (var i = 0; i < this.k.length; i++) {
-    //     var k_i = this.k[i];
-    //     // k_i * (x + Dx)^i
-    //     var termToPower = evaluateBinomial(Dx, i).multiplyByScalar(k_i);
-    //     result = result.addPolynomial(termToPower);
-    // }
-    // return result;
+    return Polynomial.sum(terms);
 };
 
 module.exports = Polynomial;
