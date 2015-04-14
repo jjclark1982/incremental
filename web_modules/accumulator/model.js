@@ -35,10 +35,8 @@ Accumulator.prototype.evaluateAtTime = function(t_1, i) {
 // first derivative of value
 Accumulator.prototype.rateAtTime = function(t_1) {
     var t = (t_1-this.t_0)/this.scale;
-    v1 = this.poly.evaluate(t - 1);
-    v2 = this.poly.evaluate(t + 1);
-    return (v2 - v1)/2;
-    return this.poly.evaluate(t, 1, this);
+    var d = this.poly.derivative(this);
+    return d.evaluate(t, 0, this);
 };
 
 // For 'batched' accumulators, the progress until the next batch is complete.

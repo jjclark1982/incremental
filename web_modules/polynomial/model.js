@@ -136,4 +136,12 @@ Polynomial.prototype.translate = function(Δx, options) {
     return Polynomial.sum(terms);
 };
 
+Polynomial.prototype.derivative = function(options) {
+    var k = [0];
+    for (var i = 1; i < this.k.length; i++) {
+        k[i-1] = i * this.k[i];
+    }
+    return new Polynomial(k);
+};
+
 module.exports = Polynomial;
