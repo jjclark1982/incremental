@@ -108,6 +108,15 @@ describe 'Polynomial', ->
             value3 = p2.evaluate(200, 0, {max: null})
             expect(value3).to.equal(3 + 2*200 + 1*200*200)
 
+        it 'min and max', ->
+            p = new Polynomial([3,2,1])
+            value = p.evaluate(2000, 0, {min: 50, max: 100})
+            expect(value).to.equal(100)
+
+            value = p.evaluate(1, 0, {min: 50, max: 100})
+            expect(value).to.equal(50)
+
+
     describe 'should evaluate a batched formula', ->
         it 'constant', ->
             p = new Polynomial([2])
@@ -121,6 +130,12 @@ describe 'Polynomial', ->
 
         it 'quadratic', ->
             p = new Polynomial([2,3,4])
+            value = p.evaluate(5)
+            value2 = p.evaluate(5.9, 0, {batched: true})
+            expect(value2).to.equal(value)
+
+        it 'cubic', ->
+            p = new Polynomial([4,3,2,1])
             value = p.evaluate(5)
             value2 = p.evaluate(5.9, 0, {batched: true})
             expect(value2).to.equal(value)
@@ -140,7 +155,13 @@ describe 'Polynomial', ->
             p = new Polynomial([2,3,4])
             x = 5.7
             value = p.evaluate(x, 0, {discrete: true})
-            expect(value).to.equal(2 + (3 + Math.floor(4*x))*x)
+            expect(value).to.equal(2 + Math.floor(3 + Math.floor(4*x))*x)
+
+        it 'cubic', ->
+            p = new Polynomial([4,3,2,1])
+            x = 5.7
+            value = p.evaluate(x, 0, {discrete: true})
+            expect(value).to.equal(4 + Math.floor(3 + Math.floor(2 + Math.floor(1*x))*x)*x)
 
     describe 'should translate to a new origin', ->
         it 'constant', ->
@@ -160,60 +181,48 @@ describe 'Polynomial', ->
             x = 5
             value = p.evaluate(x)
             expect(value).to.equal(3 + 2*x + 1*x*x)
-            rate = p.evaluate(x,1)
-            # expect(rate).to.equal(2*x + 2)
 
             p2 = p.translate(x)
             value2 = p2.evaluate(0)
             expect(value2).to.equal(value)
-            rate2 = p2.evaluate(0,1)
-            # expect(rate2).to.equal(rate)
 
             b = 8
             value3 = p2.evaluate(b - x)
             expect(value3).to.equal(b*b + 2*b + 3)
-            rate3 = p2.evaluate(b-x, 1)
-            # expect(rate3).to.equal(2*b + 2)
 
         it 'cubic', ->
             p = new Polynomial([4,3,2,1])
             x = 5
             value = p.evaluate(x)
             expect(value).to.equal(4 + 3*x + 2*x*x + 1*x*x*x)
-            rate = p.evaluate(x,1)
-            # expect(rate).to.equal(3*x*x + 4*x + 3)
 
             p2 = p.translate(x)
             value2 = p2.evaluate(0)
             expect(value2).to.equal(value)
-            rate2 = p2.evaluate(0,1)
-            # expect(rate2).to.equal(rate)
 
             b = 8
             value3 = p2.evaluate(b - x)
             expect(value3).to.equal(4 + 3*b + 2*b*b + 1*b*b*b)
-            rate3 = p2.evaluate(b-x, 1)
-            # expect(rate3).to.equal(3*b*b + 4*b + 3)
 
     describe 'should evaluate the derivative of a polynomial', ->
         it 'constant', ->
             p = new Polynomial([2])
-            rate = p.evaluate(5, 1)
+            rate = p.derivative().evaluate(5)
             expect(rate).to.equal(0)
 
         it 'affine', ->
             p = new Polynomial([1,2])
-            rate = p.evaluate(5, 1)
+            rate = p.derivative().evaluate(5)
             expect(rate).to.equal(2)
 
         it 'quadratic', ->
             p = new Polynomial([3,2,1])
             x = 5
-            rate = p.evaluate(x, 1)
+            rate = p.derivative().evaluate(x)
             expect(rate).to.equal(2*x + 2)
 
         it 'cubic', ->
             p = new Polynomial([4,3,2,1])
             x = 5
-            rate = p.evaluate(x, 1)
+            rate = p.derivative().evaluate(x)
             expect(rate).to.equal(3*x*x + 4*x + 3)
