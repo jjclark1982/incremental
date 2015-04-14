@@ -16,10 +16,10 @@ AccumulatorView = React.createClass({
             accumulator: new Accumulator()
             value: 0
             chartData: {
-                labels: [0,0,0,0,0,0,0,0,0,0]
+                labels: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
                 datasets: [
                     label: "Value"
-                    data: [0,0,0,0,0,0,0,0,0,0]
+                    data: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
                 ]
             }
         }
@@ -43,10 +43,12 @@ AccumulatorView = React.createClass({
             t = (t_1 - @accumulator.t_0) / @accumulator.scale
             value = Math.floor(@accumulator.evaluateAtTime(t_1))
             chartData = @state.chartData
-            chartData.datasets[0].data.shift()
-            chartData.datasets[0].data.push(value)
-            chartData.labels.shift()
-            chartData.labels.push(t_1)
+            @frame ?= 0
+            if @frame++ % 16 is 0
+                chartData.datasets[0].data.shift()
+                chartData.datasets[0].data.push(value)
+                chartData.labels.shift()
+                chartData.labels.push(t_1)
             @setState({
                 accumulator: @accumulator
                 t_1: t_1
