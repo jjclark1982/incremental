@@ -53,6 +53,7 @@ AccumulatorView = React.createClass({
                 rate: @accumulator.rateAtTime(t)
                 progress: @accumulator.progressAtTime(t)
                 chartData: chartData
+                skew: skew
             })
         )
 
@@ -109,6 +110,9 @@ AccumulatorView = React.createClass({
             <p className="math">
                 <var>t</var><sub>1</sub> = 
                 {(new Date()).toString()}
+            </p>
+            <p className="math">
+                Clock skew: <Numeral value={@state.skew}/> ms
             </p>
             <p className="math">
                 Time scale: 1 tick = 
