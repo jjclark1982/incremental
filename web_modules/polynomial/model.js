@@ -1,25 +1,60 @@
+var gamma = require('gamma');
+
+// factorial approximation
+function fact(n) {
+    return gamma(n+1);
+}
+
+function isInt(n) {
+    return n === (n|0);
+}
+
+function round(n, figures) {
+    figures = figures || 0;
+    var scale = Math.pow(10,figures+1);
+    return Math.round(n*scale)/scale;
+}
+
+function fpart(n) {
+    return n - Math.round(n);
+}
+
+// binomial coefficient
+function C(n, k) {
+    if (k <= 0 || k >= n) {
+        return 1;
+    }
+    var integers = (isInt(n) && isInt(k));
+    if (integers && n < 16) {
+        // find exact answer recursively, using a cache
+        C.cache[n] = C.cache[n] || [];
+        if (C.cache[n][k] != null) {
+            return C.cache[n][k];
+        }
+        var result = C(n-1, k-1) + C(n-1, k);
+        C.cache[n][k] = result;
+        return result;
+    }
+    else {
+        // find approximate answer
+        var approx = fact(n) / ( fact(k) * fact(n-k) );
+        if (integers) {
+            return Math.round(approx);
+        }
+        else {
+            return approx;
+        }
+    }
+}
+C.cache = [];
+
 // find coefficients of (x + b)^exp
 function evaluateBinomial(b, exp) {
     var k = [];
     for (var i = 0; i <= exp; i++) {
-        k[i] = binomialC(exp, i) * Math.pow(b, exp-i)
+        k[i] = C(exp, i) * Math.pow(b, exp-i)
     }
     return new Polynomial(k)
-}
-function binomialC(n, k) {
-    _cachedBC[n] = _cachedBC[n] || [];
-    if (_cachedBC[n][k] != null) {
-        return _cachedBC[n][k];
-    }
-    _cachedBC[n][k] = computeBinomialC(n, k);
-    return _cachedBC[n][k];
-}
-var _cachedBC = [];
-function computeBinomialC(n, k) {
-    if (k <= 0 || k >= n) {
-        return 1;
-    }
-    return binomialC(n-1, k-1) + binomialC(n-1, k);
 }
 
 // Polynomial is an immutable class representing a single-variable polynomial.
@@ -97,10 +132,12 @@ Polynomial.prototype.addPolynomial = function(rhs) {
 // number of manually-bought factories = poly[1]
 // these equivalences still hold after first-order translation,
 // but not higher-order translation.
+// discrete formula for a + b*x^2 + c*x^3 + ...:
+// f(x) := a + ⌊C(x,1)*b⌋ + ⌊C(x,2)*c⌋ + ... + ⌊C(x,i)*k[i]⌋
 Polynomial.prototype.evaluate = function(x, i, options) {
     options = options || {};
     i = i || 0;
-    if (i >= this.k.length) {
+    if (i >= this.k.length || i < 0 || !isInt(i)) {
         return 0;
     }
     if (options.batched) {
@@ -108,10 +145,23 @@ Polynomial.prototype.evaluate = function(x, i, options) {
     }
     var j = i + 1;
     var k_j = this.evaluate(x, j, options);
+    var k_i;
     if (options.discrete) {
-        k_j = Math.floor(k_j);
+        var c_i;
+        if (i == 0) {
+            c_i = 1;
+        }
+        else if (x < i) {
+            c_i = Math.min(x+1-i, 0);
+        }
+        else {
+            c_i = C(x,i);
+        }
+        k_i = c_i*this.k[i] + Math.floor(k_j);
     }
-    var k_i = this.k[i] + k_j*x;
+    else {
+        var k_i = this.k[i] + k_j*x;
+    }
     if (i == 0) {
         var max = options.max == null ?  Infinity : options.max;
         var min = options.min == null ? -Infinity : options.min;
@@ -133,7 +183,10 @@ Polynomial.prototype.translate = function(Δx, options) {
         var termToPower = evaluateBinomial(Δx, i).multiplyByScalar(k_i);
         terms.push(termToPower);
     }
-    return Polynomial.sum(terms);
+    var result = Polynomial.sum(terms);
+    // hack to ensure continuity in other modes
+    result.k[0] = this.evaluate(Δx, 0, options);
+    return result;
 };
 
 Polynomial.prototype.derivative = function(options) {

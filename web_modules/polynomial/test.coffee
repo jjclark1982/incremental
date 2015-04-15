@@ -1,5 +1,5 @@
 expect = require('chai').expect
-
+gamma = require('gamma')
 Polynomial = require('./model')
 
 describe 'Polynomial', ->
@@ -147,21 +147,33 @@ describe 'Polynomial', ->
 
         it 'affine', ->
             p = new Polynomial([2,3])
-            value = p.evaluate(4.5)
-            value2 = p.evaluate(4.5, 0, {discrete: true})
-            expect(value2).to.equal(value)
+            x = 4.5
+            value = p.evaluate(x, 0, {discrete: true})
+            expect(value).to.equal(2 + Math.floor(3*x))
 
         it 'quadratic', ->
             p = new Polynomial([2,3,4])
-            x = 5.7
+            x = 5
             value = p.evaluate(x, 0, {discrete: true})
-            expect(value).to.equal(2 + Math.floor(3 + Math.floor(4*x))*x)
+            # f(5) = a + 5b + 10c
+            expect(value).to.equal(2 + 5*3 + 10*4)
+
+            value2 = p.evaluate(x+0.1, 0, {discrete: true})
+            expect(value2).to.be.greaterThan(value)
+            value3 = p.evaluate(x-0.1, 0, {discrete: true})
+            expect(value3).to.be.lessThan(value)
 
         it 'cubic', ->
             p = new Polynomial([4,3,2,1])
-            x = 5.7
+            x = 5
             value = p.evaluate(x, 0, {discrete: true})
-            expect(value).to.equal(4 + Math.floor(3 + Math.floor(2 + Math.floor(1*x))*x)*x)
+            # f(5) = a + 5b + 10c + 10d
+            expect(value).to.equal(4 + 5*3 + 10*2 + 10*1)
+
+            value2 = p.evaluate(x+0.1, 0, {discrete: true})
+            expect(value2).to.be.greaterThan(value)
+            value3 = p.evaluate(x-0.1, 0, {discrete: true})
+            expect(value3).to.be.lessThan(value)
 
     describe 'should translate to a new origin', ->
         it 'constant', ->
