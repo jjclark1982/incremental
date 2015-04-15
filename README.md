@@ -35,8 +35,14 @@ Compiler and server behavior can be controlled through environment variables:
 
 - graph of value for each type
 
-
 ### Notes on "discrete" behavior
+
+currently "discrete" behavior is just an exaggerated step function.
+would like it to behave more like the integral of a step function.
+
+similarly, "batched" behavior is off for quadratics and above.
+consider f(x) = z*x^3 + a*x^2 + b*x + c
+
 
     f(x) = a + b*x + c*x^2 + d*x^3
         
@@ -57,6 +63,10 @@ Compiler and server behavior can be controlled through environment variables:
     8     a + 8b + 28c + 56d   b + 8c + 28d         c + 8d       d
     9     a + 9b + 36c + 84d   b + 9c + 36d         c + 9d       d
 
+    n    c + (n-1)b + C(a-1,2) + C(C(z-2,2),2)
+       = c + (n-1)b + (a-1)(a-2)/2 + ((z-2)(z-3)/2)((z-2)(z-3)/2-1)/2
+       = c + (n-1)b + (a^2 -3a + 2)/2 + (z^4 - 10z^3 + 35z^2 - 50z + 24)/8
+
     b sequence = 0,1,2,3,4,5,6 = lin(x) = x
     c sequence = 0,0,1,3,6,10,15,21,28,36 = tri(x-1) = C(x,2) = x(x-1)/2
     d sequence = 0,0,0,1,4,10,20,35,56,84 = tet(x-2) = C(x,3) = x(x-1)(x-2)/6
@@ -73,3 +83,14 @@ Compiler and server behavior can be controlled through environment variables:
 
     f(x,n) := 0 when n > degree(f)
     f(x,i) := k_i + ⌊f(x-1,i+1)*x⌋
+
+
+    recursive evaluation:
+
+        given k = [c, b, a, z, ...]
+        f(x,0) := k_0
+        f(x,i) := k_i + ⌊f(x-1,i+1)*x⌋
+
+        g(n, 0) := 1
+        g(n, i) := C(g(n-1,x), 2)
+        f(x, i) := k_i + f(x, i+1)*x

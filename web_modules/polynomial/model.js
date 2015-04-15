@@ -175,6 +175,7 @@ Polynomial.prototype.evaluate = function(x, i, options) {
 // Translate a function f(x) to a new origin:
 // F(x) == f(x + Δx)
 // F‘(x) == f‘(x + Δx)
+// see http://math.stackexchange.com/questions/1179086/translation-of-a-polynomial
 Polynomial.prototype.translate = function(Δx, options) {
     var terms = [];
     for (var i = 0; i < this.k.length; i++) {

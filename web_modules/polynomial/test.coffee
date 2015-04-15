@@ -49,23 +49,19 @@ describe 'Polynomial', ->
         p4 = p1.addPolynomial(p2)
         expect(p4).to.deep.equal(expected)
 
-    describe 'should identify the degree of a formula', ->
-        it 'constant', ->
-            p = new Polynomial([1,0])
-            expect(p.isConstant()).to.be.true
-            expect(p.degree()).to.equal(0)
+    it 'should identify the degree of a formula', ->
+        p0 = new Polynomial([1,0])
+        expect(p0.isConstant()).to.be.true
+        expect(p0.degree()).to.equal(0)
 
-        it 'affine', ->
-            p = new Polynomial([2,1,null])
-            expect(p.degree()).to.equal(1)
+        p1 = new Polynomial([2,1,null])
+        expect(p1.degree()).to.equal(1)
 
-        it 'quadratic', ->
-            p = new Polynomial([3,2,1,])
-            expect(p.degree()).to.equal(2)
+        p2 = new Polynomial([3,2,1,])
+        expect(p2.degree()).to.equal(2)
 
-        it 'cubic', ->
-            p = new Polynomial([4,3,2,1])
-            expect(p.degree()).to.equal(3)
+        p3 = new Polynomial([4,3,2,1])
+        expect(p3.degree()).to.equal(3)
 
     describe 'should evaluate a continuous formula', ->
         it 'constant', ->
@@ -82,13 +78,15 @@ describe 'Polynomial', ->
 
         it 'quadratic', ->
             p = new Polynomial([2,3,4])
-            value = p.evaluate(5)
-            expect(value).to.equal(2 + 3*5 + 4*5*5)
+            x = 5
+            value = p.evaluate(x)
+            expect(value).to.equal(2 + 3*x + 4*x*x)
 
         it 'cubic', ->
             p = new Polynomial([4,3,2,1])
-            value = p.evaluate(5)
-            expect(value).to.equal(4 + 3*5 + 2*5*5 + 1*5*5*5)
+            x = 5
+            value = p.evaluate(x)
+            expect(value).to.equal(4 + 3*x + 2*x*x + 1*x*x*x)
 
     describe 'should evaluate a bounded formula', ->
         it 'min', ->
