@@ -24,8 +24,7 @@ function C(n, k) {
     if (k <= 0 || k >= n) {
         return 1;
     }
-    var integers = (isInt(n) && isInt(k));
-    if (integers && n < 16) {
+    if (n < 16 && isInt(n) && isInt(k)) {
         // find exact answer recursively, using a cache
         C.cache[n] = C.cache[n] || [];
         if (C.cache[n][k] != null) {
@@ -37,16 +36,20 @@ function C(n, k) {
     }
     else {
         // find approximate answer
-        var approx = fact(n) / ( fact(k) * fact(n-k) );
-        if (integers) {
-            return Math.round(approx);
-        }
-        else {
-            return approx;
-        }
+        return numC(n, k);
     }
 }
 C.cache = [];
+
+function numC(n, k) {
+    var approx = fact(n) / ( fact(k) * fact(n-k) );
+    if (isInt(n) && isInt(k)) {
+        return Math.round(approx);
+    }
+    else {
+        return approx;
+    }
+}
 
 // find coefficients of (x + b)^exp
 function evaluateBinomial(b, exp) {
@@ -151,18 +154,18 @@ Polynomial.prototype.evaluate = function(x, i, options) {
         if (i == 0) {
             c_i = 1;
         }
-        else if (x < i) {
-            c_i = Math.min(x+1-i, 0);
-        }
         else {
-            c_i = C(x,i);
+            c_i = Math.max(numC(x,i), 0);
         }
-        k_i = c_i*this.k[i] + Math.floor(k_j);
+        k_i = c_i*this.k[i] + k_j;
     }
     else {
         var k_i = this.k[i] + k_j*x;
     }
     if (i == 0) {
+        if (options.precision) {
+            k_i = round(k_i, options.precision);
+        }
         var max = options.max == null ?  Infinity : options.max;
         var min = options.min == null ? -Infinity : options.min;
         return Math.max(Math.min(k_i, max), min);

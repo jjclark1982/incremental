@@ -144,34 +144,38 @@ describe 'Polynomial', ->
             expect(p.evaluate(5.5),0,{discrete: true}).to.equal(2)
 
         it 'affine', ->
-            p = new Polynomial([2,3])
+            p = new Polynomial([2.2,3.3])
             x = 4.5
             value = p.evaluate(x, 0, {discrete: true})
-            expect(value).to.equal(2 + Math.floor(3*x))
+            expect(value).to.equal(2.2 + 3.3*x)
 
         it 'quadratic', ->
-            p = new Polynomial([2,3,4])
-            x = 5
+            p = new Polynomial([2.2,3.3,4.4])
+            x = 5 # f(5) = a + 5b + 10c
             value = p.evaluate(x, 0, {discrete: true})
-            # f(5) = a + 5b + 10c
-            expect(value).to.equal(2 + 5*3 + 10*4)
+            expect(value).to.equal(2.2 + (5*3.3) + (10*4.4))
 
             value2 = p.evaluate(x+0.1, 0, {discrete: true})
             expect(value2).to.be.greaterThan(value)
             value3 = p.evaluate(x-0.1, 0, {discrete: true})
             expect(value3).to.be.lessThan(value)
+
+            # expect(value).to.equal(2.2 + Math.floor(3.3 + Math.floor(4.4)*x)*x)
+            # expect(value).not.to.equal(p.evaluate(x))
 
         it 'cubic', ->
-            p = new Polynomial([4,3,2,1])
-            x = 5
+            p = new Polynomial([4.4,3.3,2.2,1.1])
+            x = 5 # f(5) = a + 5b + 10c + 10d
             value = p.evaluate(x, 0, {discrete: true})
-            # f(5) = a + 5b + 10c + 10d
-            expect(value).to.equal(4 + 5*3 + 10*2 + 10*1)
+            expect(value).to.equal(4.4 + (5*3.3) + (10*2.2) + (10*1.1))
 
             value2 = p.evaluate(x+0.1, 0, {discrete: true})
             expect(value2).to.be.greaterThan(value)
             value3 = p.evaluate(x-0.1, 0, {discrete: true})
             expect(value3).to.be.lessThan(value)
+
+            # expect(value).to.equal(4.4 + Math.floor(3.3 + Math.floor(2.2 + Math.floor(1.1)*x)*x)*x)
+            # expect(value).not.to.equal(p.evaluate(x))
 
     describe 'should translate to a new origin', ->
         it 'constant', ->
