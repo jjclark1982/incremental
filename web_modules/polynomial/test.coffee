@@ -218,6 +218,26 @@ describe 'Polynomial', ->
             value3 = p2.evaluate(b - x)
             expect(value3).to.equal(4 + 3*b + 2*b*b + 1*b*b*b)
 
+        it 'discrete', ->
+            p = new Polynomial([4,3,2,1])
+            options = {discrete: true}
+            x = 5
+            value = p.evaluate(x, 0, options)
+            expect(value).to.equal(4 + 3*5 + 2*10 + 10*1)
+
+            p2 = p.translate(x, options)
+            value2 = p2.evaluate(0, 0, options)
+            expect(value2).to.equal(value)
+
+            rate1 = p.numericRate(x+0.5, options)
+            rate2 = p2.numericRate(0.5, options)
+            expect(rate1).to.equal(rate2)
+
+            b = 8
+            value3 = p2.evaluate(b - x, 0, options)
+            value4 = p.evaluate(b, 0, options)
+            expect(value3).to.equal(value4)
+
     describe 'should evaluate the derivative of a polynomial', ->
         it 'constant', ->
             p = new Polynomial([2])

@@ -94,3 +94,18 @@ consider f(x) = z*x^3 + a*x^2 + b*x + c
         g(n, 0) := 1
         g(n, i) := C(g(n-1,x), 2)
         f(x, i) := k_i + f(x, i+1)*x
+
+would like to revisit the discrete batching issue
+
+    a + ⌊C(x,1)*b⌋ 
+
+only makes sense when `b` is bought in single units
+so how can we adjust the time scale and result scale to balance single units?
+
+suppose time scale is 15 sec = 1 tick
+one factory builder produces first widget after 30 sec
+5.7 widgets in 60 sec
+66 widgets in 180 sec
+7140 in 30 min
+
+1 widget is still in significance
