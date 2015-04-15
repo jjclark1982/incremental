@@ -197,4 +197,10 @@ Polynomial.prototype.derivative = function(options) {
     return new Polynomial(k);
 };
 
+Polynomial.prototype.numericRate = function(x, options) {
+    var v1 = this.evaluate(x-0.125, 0, options);
+    var v2 = this.evaluate(x+0.125, 0, options);
+    return (v2-v1)/0.25;
+};
+
 module.exports = Polynomial;
