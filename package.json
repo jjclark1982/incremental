@@ -23,6 +23,7 @@
     "csswring": "^2.0.0",
     "extract-text-webpack-plugin": "^0.3.8",
     "file-loader": "^0.8.1",
+    "gamma": "^1.0.0",
     "glob": "^5.0.5",
     "numbro": "^1.0.4",
     "postcss-import": "^4.1.0",
