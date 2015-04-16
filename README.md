@@ -109,3 +109,11 @@ one factory builder produces first widget after 30 sec
 7140 in 30 min
 
 1 widget is still in significance
+
+and what about when b = 2?
+producing one product every 0.5 ticks is accurate in the long term, but not the short term.
+we have "discrete + batched" mode for that.
+
+do we want to differentiate "very discrete" (only complete factories produce anything)
+from "discrete" (factories don't start producing until they are started)?
+what effect does this choice have on translation?

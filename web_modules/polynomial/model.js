@@ -179,17 +179,20 @@ Polynomial.prototype.evaluate = function(x, options, i) {
     var k_j = this.evaluate(x, options, j);
     var k_i;
     if (options.discrete) {
+        if (options.very_discrete && i > 0) {
+            k_j = Math.floor(k_j);
+        }
         var c_i;
         if (i == 0) {
             c_i = 1;
         }
         else {
-            c_i = Math.max(numericC(x,i), 0);
+            c_i = Math.max(0, numericC(x,i));
         }
         k_i = c_i*this.k[i] + k_j;
     }
     else {
-        var k_i = this.k[i] + k_j*x;
+        k_i = this.k[i] + k_j*x;
     }
     if (i == 0) {
         if (options.precision) {
