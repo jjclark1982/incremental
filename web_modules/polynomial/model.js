@@ -16,32 +16,35 @@ function round(n, figures) {
 }
 
 function fpart(n) {
-    return n - Math.round(n);
+    return n - Math.floor(n);
 }
 
 // binomial coefficient
 function C(n, k) {
+    if (n < 16 && isInt(n) && isInt(k)) {
+        return discreteC(n, k);
+    }
+    else {
+        return numericC(n, k);
+    }
+}
+
+function discreteC(n, k) {
     if (k <= 0 || k >= n) {
         return 1;
     }
-    if (n < 16 && isInt(n) && isInt(k)) {
-        // find exact answer recursively, using a cache
-        C.cache[n] = C.cache[n] || [];
-        if (C.cache[n][k] != null) {
-            return C.cache[n][k];
-        }
-        var result = C(n-1, k-1) + C(n-1, k);
-        C.cache[n][k] = result;
-        return result;
+    // find exact answer recursively, using a cache
+    discreteC.cache[n] = discreteC.cache[n] || [];
+    if (discreteC.cache[n][k] != null) {
+        return discreteC.cache[n][k];
     }
-    else {
-        // find approximate answer
-        return numC(n, k);
-    }
+    var result = discreteC(n-1, k-1) + discreteC(n-1, k);
+    discreteC.cache[n][k] = result;
+    return result;
 }
-C.cache = [];
+discreteC.cache = [];
 
-function numC(n, k) {
+function numericC(n, k) {
     var approx = fact(n) / ( fact(k) * fact(n-k) );
     if (isInt(n) && isInt(k)) {
         return Math.round(approx);
@@ -55,7 +58,7 @@ function numC(n, k) {
 function evaluateBinomial(b, exp) {
     var k = [];
     for (var i = 0; i <= exp; i++) {
-        k[i] = C(exp, i) * Math.pow(b, exp-i)
+        k[i] = discreteC(exp, i) * Math.pow(b, exp-i)
     }
     return new Polynomial(k)
 }
@@ -155,7 +158,7 @@ Polynomial.prototype.evaluate = function(x, i, options) {
             c_i = 1;
         }
         else {
-            c_i = Math.max(numC(x,i), 0);
+            c_i = Math.max(numericC(x,i), 0);
         }
         k_i = c_i*this.k[i] + k_j;
     }
