@@ -29,7 +29,7 @@ Accumulator.prototype.reset = function(k) {
 // TODO: handle skew here so consumers don't have to
 Accumulator.prototype.evaluateAtTime = function(t_1, i) {
     var t = (t_1-this.t_0)/this.scale;
-    return this.poly.evaluate(t, i, this);
+    return this.poly.evaluate(t, this, i);
 };
 
 // first derivative of value
@@ -40,7 +40,7 @@ Accumulator.prototype.rateAtTime = function(t_1) {
     }
     else {
         var d = this.poly.derivative(this);
-        return d.evaluate(t, 0, this);
+        return d.evaluate(t, this);
     }
 };
 

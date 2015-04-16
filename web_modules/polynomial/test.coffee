@@ -91,27 +91,27 @@ describe 'Polynomial', ->
     describe 'should evaluate a bounded formula', ->
         it 'min', ->
             p = new Polynomial([3,2,1])
-            value = p.evaluate(2, 0, {min: 100})
+            value = p.evaluate(2, {min: 100})
             expect(value).to.equal(100)
 
         it 'max', ->
             p = new Polynomial([3,2,1])
-            value = p.evaluate(200, 0, {max: 100})
+            value = p.evaluate(200, {max: 100})
             expect(value).to.equal(100)
 
             p2 = new Polynomial([3,2,1])
-            value2 = p2.evaluate(200, 0, {max: Infinity})
+            value2 = p2.evaluate(200, {max: Infinity})
             expect(value2).to.equal(3 + 2*200 + 1*200*200)
 
-            value3 = p2.evaluate(200, 0, {max: null})
+            value3 = p2.evaluate(200, {max: null})
             expect(value3).to.equal(3 + 2*200 + 1*200*200)
 
         it 'min and max', ->
             p = new Polynomial([3,2,1])
-            value = p.evaluate(2000, 0, {min: 50, max: 100})
+            value = p.evaluate(2000, {min: 50, max: 100})
             expect(value).to.equal(100)
 
-            value = p.evaluate(1, 0, {min: 50, max: 100})
+            value = p.evaluate(1, {min: 50, max: 100})
             expect(value).to.equal(50)
 
 
@@ -123,19 +123,19 @@ describe 'Polynomial', ->
         it 'affine', ->
             p = new Polynomial([2,3])
             value = p.evaluate(4)
-            value2 = p.evaluate(4.9, 0, {batched: true})
+            value2 = p.evaluate(4.9, {batched: true})
             expect(value2).to.equal(value)
 
         it 'quadratic', ->
             p = new Polynomial([2,3,4])
             value = p.evaluate(5)
-            value2 = p.evaluate(5.9, 0, {batched: true})
+            value2 = p.evaluate(5.9, {batched: true})
             expect(value2).to.equal(value)
 
         it 'cubic', ->
             p = new Polynomial([4,3,2,1])
             value = p.evaluate(5)
-            value2 = p.evaluate(5.9, 0, {batched: true})
+            value2 = p.evaluate(5.9, {batched: true})
             expect(value2).to.equal(value)
 
     describe 'should evaluate a discrete formula', ->
@@ -146,18 +146,18 @@ describe 'Polynomial', ->
         it 'affine', ->
             p = new Polynomial([2.2,3.3])
             x = 4.5
-            value = p.evaluate(x, 0, {discrete: true})
+            value = p.evaluate(x, {discrete: true})
             expect(value).to.equal(2.2 + 3.3*x)
 
         it 'quadratic', ->
             p = new Polynomial([2.2,3.3,4.4])
             x = 5 # f(5) = a + 5b + 10c
-            value = p.evaluate(x, 0, {discrete: true})
+            value = p.evaluate(x, {discrete: true})
             expect(value).to.equal(2.2 + (5*3.3) + (10*4.4))
 
-            value2 = p.evaluate(x+0.1, 0, {discrete: true})
+            value2 = p.evaluate(x+0.1, {discrete: true})
             expect(value2).to.be.greaterThan(value)
-            value3 = p.evaluate(x-0.1, 0, {discrete: true})
+            value3 = p.evaluate(x-0.1, {discrete: true})
             expect(value3).to.be.lessThan(value)
 
             # expect(value).to.equal(2.2 + Math.floor(3.3 + Math.floor(4.4)*x)*x)
@@ -166,12 +166,12 @@ describe 'Polynomial', ->
         it 'cubic', ->
             p = new Polynomial([4.4,3.3,2.2,1.1])
             x = 5 # f(5) = a + 5b + 10c + 10d
-            value = p.evaluate(x, 0, {discrete: true})
+            value = p.evaluate(x, {discrete: true})
             expect(value).to.equal(4.4 + (5*3.3) + (10*2.2) + (10*1.1))
 
-            value2 = p.evaluate(x+0.1, 0, {discrete: true})
+            value2 = p.evaluate(x+0.1, {discrete: true})
             expect(value2).to.be.greaterThan(value)
-            value3 = p.evaluate(x-0.1, 0, {discrete: true})
+            value3 = p.evaluate(x-0.1, {discrete: true})
             expect(value3).to.be.lessThan(value)
 
             # expect(value).to.equal(4.4 + Math.floor(3.3 + Math.floor(2.2 + Math.floor(1.1)*x)*x)*x)
@@ -222,11 +222,11 @@ describe 'Polynomial', ->
             p = new Polynomial([4,3,2,1])
             options = {discrete: true}
             x = 5
-            value = p.evaluate(x, 0, options)
+            value = p.evaluate(x, options)
             expect(value).to.equal(4 + 3*5 + 2*10 + 10*1)
 
             p2 = p.translate(x, options)
-            value2 = p2.evaluate(0, 0, options)
+            value2 = p2.evaluate(0, options)
             expect(value2).to.equal(value)
 
             rate1 = p.numericRate(x+0.5, options)
@@ -234,8 +234,8 @@ describe 'Polynomial', ->
             expect(rate1).to.equal(rate2)
 
             b = 8
-            value3 = p2.evaluate(b - x, 0, options)
-            value4 = p.evaluate(b, 0, options)
+            value3 = p2.evaluate(b - x, options)
+            value4 = p.evaluate(b, options)
             expect(value3).to.equal(value4)
 
     describe 'should evaluate the derivative of a polynomial', ->

@@ -55,6 +55,7 @@ function numericC(n, k) {
 }
 
 // find coefficients of (x + b)^exp
+// TODO: generalize this as Polynomial.pow()
 function evaluateBinomial(b, exp) {
     var k = [];
     for (var i = 0; i <= exp; i++) {
@@ -140,7 +141,7 @@ Polynomial.prototype.addPolynomial = function(rhs) {
 // but not higher-order translation.
 // discrete formula for a + b*x^2 + c*x^3 + ...:
 // f(x) := a + ⌊C(x,1)*b⌋ + ⌊C(x,2)*c⌋ + ... + ⌊C(x,i)*k[i]⌋
-Polynomial.prototype.evaluate = function(x, i, options) {
+Polynomial.prototype.evaluate = function(x, options, i) {
     options = options || {};
     i = i || 0;
     if (i >= this.k.length || i < 0 || !isInt(i)) {
@@ -150,7 +151,7 @@ Polynomial.prototype.evaluate = function(x, i, options) {
         x = Math.floor(x);
     }
     var j = i + 1;
-    var k_j = this.evaluate(x, j, options);
+    var k_j = this.evaluate(x, options, j);
     var k_i;
     if (options.discrete) {
         var c_i;
@@ -192,7 +193,7 @@ Polynomial.prototype.translate = function(Δx, options) {
     }
     var result = Polynomial.sum(terms);
     // hack to ensure continuity in other modes
-    result.k[0] = this.evaluate(Δx, 0, options);
+    result.k[0] = this.evaluate(Δx, options);
     return result;
 };
 
@@ -205,9 +206,11 @@ Polynomial.prototype.derivative = function(options) {
 };
 
 Polynomial.prototype.numericRate = function(x, options) {
-    var v1 = this.evaluate(x-0.125, 0, options);
-    var v2 = this.evaluate(x+0.125, 0, options);
-    return (v2-v1)/0.25;
+    var delta = 1/256;
+    var val1 = this.evaluate(x, options);
+    var val2 = this.evaluate(x+delta, options);
+    var epsilon = val2 - val1;
+    return epsilon/delta;
 };
 
 module.exports = Polynomial;
