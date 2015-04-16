@@ -5,6 +5,10 @@ function fact(n) {
     return gamma(n+1);
 }
 
+function lnFact(n) {
+    return gamma.log(n+1);
+}
+
 function isInt(n) {
     return n === (n|0);
 }
@@ -45,7 +49,11 @@ function discreteC(n, k) {
 discreteC.cache = [];
 
 function numericC(n, k) {
-    var approx = fact(n) / ( fact(k) * fact(n-k) );
+    if (n > 100) {
+        (fact(n) / fact(n-k)) / fact(k)
+    }
+    // var approx = fact(n) / ( fact(k) * fact(n-k) );
+    var approx = Math.exp(lnFact(n) - lnFact(k) - lnFact(n-k));
     if (isInt(n) && isInt(k)) {
         return Math.round(approx);
     }
