@@ -54,16 +54,6 @@ function numericC(n, k) {
     }
 }
 
-// find coefficients of (x + b)^exp
-// TODO: generalize this as Polynomial.pow()
-function evaluateBinomial(b, exp) {
-    var k = [];
-    for (var i = 0; i <= exp; i++) {
-        k[i] = discreteC(exp, i) * Math.pow(b, exp-i)
-    }
-    return new Polynomial(k)
-}
-
 // Polynomial is an immutable class representing a single-variable polynomial.
 // It is represented as an array of coefficients k[],
 // such that f(x) = k_i * x^i + ... + k_0
@@ -110,7 +100,7 @@ Polynomial.prototype.isConstant = function() {
     return (this.degree() == 0);
 };
 
-Polynomial.prototype.multiplyByScalar = function(s) {
+Polynomial.prototype.scale = function(s) {
     var newK = [];
     for (var i = 0; i < this.k.length; i++) {
         newK[i] = s * this.k[i];
@@ -129,6 +119,27 @@ Polynomial.sum = function(polys) {
     }
     return new Polynomial(k);
 };
+
+Polynomial.prototype.pow = function(exp) {
+    var degree = this.degree();
+    if (degree == 0) {
+        return Math.pow(this.k[0], exp);
+    }
+    else if (degree == 1) {
+        // binomial: find coefficients of (a*x + b)^exp
+        var a = this.k[1];
+        var b = this.k[0];
+        var k = [];
+        for (var i = 0; i <= exp; i++) {
+            // coefficient of x^i: a^i * C(exp, i) * b^{exp-i}
+            k[i] = Math.pow(a,i) * discreteC(exp, i) * Math.pow(b, exp-i);
+        }
+        return new Polynomial(k)
+    }
+    else {
+        throw new Error("not implemented")
+    }
+}
 
 Polynomial.prototype.addPolynomial = function(rhs) {
     return Polynomial.sum([this, rhs]);
@@ -187,9 +198,10 @@ Polynomial.prototype.translate = function(Δx, options) {
     var terms = [];
     for (var i = 0; i < this.k.length; i++) {
         var k_i = this.k[i];
-        // k_i * (x + Δx)^i
-        var termToPower = evaluateBinomial(Δx, i).multiplyByScalar(k_i);
-        terms.push(termToPower);
+        // for each offest term (x + Δx)^i
+        // find k_i * (x + Δx)^i
+        var term = Polynomial([Δx, 1]).pow(i).scale(k_i);
+        terms.push(term);
     }
     var result = Polynomial.sum(terms);
     // hack to ensure continuity in other modes

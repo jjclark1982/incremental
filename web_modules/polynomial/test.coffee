@@ -31,7 +31,7 @@ describe 'Polynomial', ->
 
     it 'should multiply by scalars', ->
         p = new Polynomial([1,2,3])
-        p2 = p.multiplyByScalar(4)
+        p2 = p.scale(4)
         value = p.evaluate(5)
         expect(value).to.equal(3*5*5 + 2*5 + 1)
 
