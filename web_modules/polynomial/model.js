@@ -108,6 +108,20 @@ Polynomial.prototype.scale = function(s) {
     return new Polynomial(newK);
 };
 
+Polynomial.prototype.mult = function(rhs) {
+    rhs = Polynomial(rhs);
+    var result = [];
+    for (var i = 0; i < this.k.length; i++) {
+        var k_i = this.k[i];
+        for (var j = 0; j < rhs.k.length; j++) {
+            var k_j = rhs.k[j];
+            var exp = i + j;
+            result[exp] = (result[exp] || 0) + k_i*k_j;
+        }
+    }
+    return new Polynomial(result);
+}
+
 Polynomial.sum = function(polys) {
     var k = [];
     polys = polys || [];
