@@ -19,8 +19,17 @@ function round(n, figures) {
     return Math.round(n*scale)/scale;
 }
 
+function ipart(n) {
+    if (n >= 0) {
+        return Math.floor(n);
+    }
+    else {
+        return Math.ceil(n);
+    }
+}
+
 function fpart(n) {
-    return n - Math.floor(n);
+    return n - ipart(n);
 }
 
 // binomial coefficient
@@ -49,11 +58,19 @@ function discreteC(n, k) {
 discreteC.cache = [];
 
 function numericC(n, k) {
-    if (n > 100) {
-        (fact(n) / fact(n-k)) / fact(k)
+    // extending range to 0 appears to keep things continuous
+    if (k <= -1 || k >= n+1) {
+        return 0;
     }
-    // var approx = fact(n) / ( fact(k) * fact(n-k) );
-    var approx = Math.exp(lnFact(n) - lnFact(k) - lnFact(n-k));
+    var approx;
+    if (n < 100) {
+        // more accurate for small numbers
+        approx = fact(n) / (fact(k) * fact(n-k));
+    }
+    else {
+        // keep large numbers in mantissa
+        approx = Math.exp(lnFact(n) - lnFact(k) - lnFact(n-k));
+    }
     if (isInt(n) && isInt(k)) {
         return Math.round(approx);
     }
@@ -83,7 +100,7 @@ function Polynomial(k) {
 
 Polynomial.prototype.toJSON = function() {
     return this.k;
-}
+};
 
 Polynomial.prototype.clone = function() {
     var newK = [];
@@ -91,7 +108,7 @@ Polynomial.prototype.clone = function() {
         newK[i] = this.k[i];
     }
     return new Polynomial(newK);
-}
+};
 
 Polynomial.prototype.degree = function() {
     var degree = 0;
@@ -128,7 +145,7 @@ Polynomial.prototype.mult = function(rhs) {
         }
     }
     return new Polynomial(result);
-}
+};
 
 Polynomial.sum = function(polys) {
     var k = [];
@@ -161,7 +178,7 @@ Polynomial.prototype.pow = function(exp) {
     else {
         throw new Error("not implemented")
     }
-}
+};
 
 Polynomial.prototype.addPolynomial = function(rhs) {
     return Polynomial.sum([this, rhs]);
@@ -180,23 +197,14 @@ Polynomial.prototype.evaluate = function(x, options, i) {
     if (i >= this.k.length || i < 0 || !isInt(i)) {
         return 0;
     }
-    if (options.batched) {
-        x = Math.floor(x);
-    }
     var j = i + 1;
     var k_j = this.evaluate(x, options, j);
+    if (options.batched) {
+        k_j = ipart(k_j);
+    }
     var k_i;
     if (options.discrete) {
-        if (options.very_discrete && i > 0) {
-            k_j = Math.floor(k_j);
-        }
-        var c_i;
-        if (i == 0) {
-            c_i = 1;
-        }
-        else {
-            c_i = Math.max(0, numericC(x,i));
-        }
+        var c_i = numericC(x,i);
         k_i = c_i*this.k[i] + k_j;
     }
     else {
@@ -220,6 +228,14 @@ Polynomial.prototype.evaluate = function(x, options, i) {
 // F‘(x) == f‘(x + Δx)
 // see http://math.stackexchange.com/questions/1179086/translation-of-a-polynomial
 Polynomial.prototype.translate = function(Δx, options) {
+    options = options || {};
+    if (options.discrete) {
+        var k = [];
+        for (var i = 0; i < this.k.length; i++) {
+            k[i] = this.k[i] + this.evaluate(Δx, options, i+1);
+        }
+        return new Polynomial(k);
+    }
     var terms = [];
     for (var i = 0; i < this.k.length; i++) {
         var k_i = this.k[i];
@@ -228,10 +244,7 @@ Polynomial.prototype.translate = function(Δx, options) {
         var term = Polynomial([Δx, 1]).pow(i).scale(k_i);
         terms.push(term);
     }
-    var result = Polynomial.sum(terms);
-    // hack to ensure continuity in other modes
-    result.k[0] = this.evaluate(Δx, options);
-    return result;
+    return Polynomial.sum(terms);
 };
 
 Polynomial.prototype.derivative = function(options) {
