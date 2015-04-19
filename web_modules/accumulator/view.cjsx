@@ -13,6 +13,7 @@ AccumulatorView = React.createClass({
 
     getInitialState: ->
         return {
+            autoSave: true
             accumulator: new Accumulator()
             value: 0
             chartData: {
@@ -30,6 +31,8 @@ AccumulatorView = React.createClass({
         @accumulator = new Accumulator(saveData)
         @accumulator.onChange = =>
             @setStateFromAccumulator()
+            if @state.autoSave
+                @save()
         clock.on('frame', @setStateFromAccumulator, @)
         @setStateFromAccumulator()
 
@@ -88,6 +91,11 @@ AccumulatorView = React.createClass({
         @accumulator.batched = !@accumulator.batched
         @setStateFromAccumulator()
 
+    toggleAutoSave: ->
+        @setState({
+            autoSave: !@state.autoSave
+        })
+
     reset: ->
         @accumulator.reset()
         @setStateFromAccumulator()
@@ -145,7 +153,8 @@ AccumulatorView = React.createClass({
                 <button className="pure-button" onClick={@addOnePerSecond}>Add 1/sec</button>{' '}
                 <button className="pure-button" onClick={@addOnePerSecondPerSecond}>Add 1/sec<sup>2</sup></button>{' '}
                 <button className="pure-button" onClick={@reset}>Reset</button>{' '}
-                <button className="pure-button" onClick={@save}>Save</button>
+                <button className="pure-button" onClick={@save}>Save</button>{' '}
+                <label className="pure-checkbox"><input type="checkbox" onChange={@toggleAutoSave} checked={@state.autoSave} />auto-save</label> 
             </p>
             <p>
                 <label className="pure-checkbox"><input type="checkbox" onChange={@toggleDiscrete} checked={@state.accumulator.discrete} /> discrete</label>{' '}
