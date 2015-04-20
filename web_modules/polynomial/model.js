@@ -261,12 +261,16 @@ Polynomial.prototype.translate = function(Δx, options) {
     return Polynomial.sum(terms);
 };
 
-Polynomial.prototype.derivative = function(options) {
+Polynomial.prototype.derivative = function() {
     var k = [0];
     for (var i = 1; i < this.k.length; i++) {
         k[i-1] = i * this.k[i];
     }
     return new Polynomial(k);
+};
+
+Polynomial.prototype.analyticRate = function(x, options) {
+    return this.derivative().evaluate(x, options);
 };
 
 Polynomial.prototype.numericRate = function(x, options) {
