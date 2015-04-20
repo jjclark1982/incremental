@@ -141,6 +141,22 @@ Polynomial.prototype.isConstant = function() {
     return (this.degree() == 0);
 };
 
+Polynomial.sum = function(polys) {
+    var k = [];
+    polys = polys || [];
+    for (var i = 0; i < polys.length; i++) {
+        var p = Polynomial(polys[i]);
+        for (var j = 0; j < p.k.length; j++) {
+            k[j] = (k[j] || 0) + p.k[j];
+        }
+    }
+    return new Polynomial(k);
+};
+
+Polynomial.prototype.add = function(rhs) {
+    return Polynomial.sum([this, rhs]);
+};
+
 Polynomial.prototype.mult = function(rhs) {
     rhs = Polynomial(rhs);
     var result = [];
@@ -153,18 +169,6 @@ Polynomial.prototype.mult = function(rhs) {
         }
     }
     return new Polynomial(result);
-};
-
-Polynomial.sum = function(polys) {
-    var k = [];
-    polys = polys || [];
-    for (var i = 0; i < polys.length; i++) {
-        var p = Polynomial(polys[i]);
-        for (var j = 0; j < p.k.length; j++) {
-            k[j] = (k[j] || 0) + p.k[j];
-        }
-    }
-    return new Polynomial(k);
 };
 
 Polynomial.prototype.pow = function(exp) {
@@ -186,10 +190,6 @@ Polynomial.prototype.pow = function(exp) {
     else {
         throw new Error("not implemented")
     }
-};
-
-Polynomial.prototype.addPolynomial = function(rhs) {
-    return Polynomial.sum([this, rhs]);
 };
 
 // number of widgets at time t = evaluate(poly, t, 0)

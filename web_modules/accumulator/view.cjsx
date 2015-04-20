@@ -75,13 +75,13 @@ AccumulatorView = React.createClass({
     #     return false
 
     addOne: ->
-        @accumulator.addPolynomial([1])
+        @accumulator.add([1])
 
     addOnePerSecond: ->
-        @accumulator.addPolynomial([0, 1])
+        @accumulator.add([0, 1])
 
     addOnePerSecondPerSecond: ->
-        @accumulator.addPolynomial([0, 0, 1])
+        @accumulator.add([0, 0, 1])
 
     toggleDiscrete: ->
         @accumulator.discrete = !@accumulator.discrete

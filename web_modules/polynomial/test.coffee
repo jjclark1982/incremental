@@ -58,7 +58,7 @@ describe 'Polynomial', ->
         p3 = Polynomial.sum([p1,p2])
         expect(p3).to.deep.equal(expected)
 
-        p4 = p1.addPolynomial(p2)
+        p4 = p1.add(p2)
         expect(p4).to.deep.equal(expected)
 
     it 'should identify the degree of a formula', ->

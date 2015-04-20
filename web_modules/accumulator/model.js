@@ -55,11 +55,11 @@ Accumulator.prototype.progressAtTime = function(t_1) {
 
 // would like to support negative mods with floors
 // eg consume materials to produce products, without going below zero
-Accumulator.prototype.addPolynomial = function(rhs) {
+Accumulator.prototype.add = function(rhs) {
     var self = this;
     rhs = Polynomial(rhs);
     if (rhs.isConstant()) { // bypass clock for constants
-        self.poly = self.poly.addPolynomial(rhs);
+        self.poly = self.poly.add(rhs);
         if (self.onChange) {
             self.onChange();
         }
@@ -69,7 +69,7 @@ Accumulator.prototype.addPolynomial = function(rhs) {
         var t_1 = Date.now() - skew;
         var Dt = (t_1 - self.t_0) / self.scale;
         self.poly = self.poly.translate(Dt, self);
-        self.poly = self.poly.addPolynomial(rhs);
+        self.poly = self.poly.add(rhs);
         self.t_0 = t_1;
 
         // TODO: emit a proper change event
