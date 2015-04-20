@@ -253,14 +253,14 @@ describe 'Polynomial', ->
             value2 = p2.evaluate(0, options)
             expect(value2).to.equal(value)
 
-            # rate1 = p.numericRate(x+0.5, options)
-            # rate2 = p2.numericRate(0.5, options)
-            # expect(rate1).to.equal(rate2)
-
             b = 8
             value3 = p2.evaluate(b-x, options)
             value4 = p.evaluate(b, options)
             expect(value3).to.equal(value4)
+
+            rate1 = p.numericRate(x+0.5, options)
+            rate2 = p2.numericRate(0.5, options)
+            expect(Math.abs(rate2-rate1)).to.be.lessThan(0.1)
 
     describe 'should evaluate the derivative of a polynomial', ->
         it 'constant', ->

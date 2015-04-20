@@ -227,12 +227,18 @@ Polynomial.prototype.evaluate = function(x, options, i) {
 // F(x) == f(x + Δx)
 // F‘(x) == f‘(x + Δx)
 // see http://math.stackexchange.com/questions/1179086/translation-of-a-polynomial
+// see also http://math.stackexchange.com/questions/1243331/
 Polynomial.prototype.translate = function(Δx, options) {
     options = options || {};
     if (options.discrete) {
         var k = [];
         for (var i = 0; i < this.k.length; i++) {
-            k[i] = this.k[i] + this.evaluate(Δx, options, i+1);
+            k[i] = 0;
+            for (var j = i; j < this.k.length; j++) {
+                k[i] += numericC(Δx, j-i) * this.k[j];
+            }
+            // TODO: figure out if we need to handle 'batched' specially in this context
+            // k[i] = this.k[i] + this.evaluate(Δx, options, i+1);
         }
         return new Polynomial(k);
     }
