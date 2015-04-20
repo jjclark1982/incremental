@@ -82,7 +82,18 @@ function numericC(n, k) {
 // Polynomial is an immutable class representing a single-variable polynomial.
 // It is represented as an array of coefficients k[],
 // such that f(x) = k_i * x^i + ... + k_0
-function Polynomial(k) {
+function Polynomial(k_) {
+    var k;
+    if (arguments.length > 1) {
+        // support constructing with a tuple. e.g. Polynomial(2,3)
+        k = new Array(arguments.length);
+        for (var i = 0; i < arguments.length; i++) {
+            k[i] = arguments[i];
+        }
+    }
+    else {
+        k = k_;
+    }
     // support using the constructor to quickly ensure type.
     if (k instanceof Polynomial) {
         return k;
@@ -93,10 +104,15 @@ function Polynomial(k) {
     }
     else {
         // initialization
-        this.k = k || [];
+        if(Object.prototype.toString.call(k) !== '[object Array]') {
+            k = [k];
+        }
+        this.k = k;
         return this;
     }
 }
+
+window.P = Polynomial;
 
 Polynomial.prototype.toJSON = function() {
     return this.k;
@@ -123,14 +139,6 @@ Polynomial.prototype.degree = function() {
 
 Polynomial.prototype.isConstant = function() {
     return (this.degree() == 0);
-};
-
-Polynomial.prototype.scale = function(s) {
-    var newK = [];
-    for (var i = 0; i < this.k.length; i++) {
-        newK[i] = s * this.k[i];
-    }
-    return new Polynomial(newK);
 };
 
 Polynomial.prototype.mult = function(rhs) {
@@ -247,7 +255,7 @@ Polynomial.prototype.translate = function(Δx, options) {
         var k_i = this.k[i];
         // for each offest term (x + Δx)^i
         // find k_i * (x + Δx)^i
-        var term = Polynomial([Δx, 1]).pow(i).scale(k_i);
+        var term = Polynomial([Δx, 1]).pow(i).mult(k_i);
         terms.push(term);
     }
     return Polynomial.sum(terms);

@@ -23,6 +23,7 @@ describe 'Polynomial', ->
         p5 = new Polynomial([1,2,0])
         p6 = new Polynomial([1,2,null])
         p7 = new Polynomial([null,2])
+        p8 = new Polynomial(3,4)
 
     it 'should clone other polynomials', ->
         p = new Polynomial([1,2,3])
@@ -42,7 +43,7 @@ describe 'Polynomial', ->
 
     it 'should multiply by scalars', ->
         p = new Polynomial([1,2,3])
-        p2 = p.scale(4)
+        p2 = p.mult(4)
         value = p.evaluate(5)
         expect(value).to.equal(3*5*5 + 2*5 + 1)
 
