@@ -76,10 +76,10 @@ else {
 
 try {
     require.resolve('mocha');
-    config.entry.test = ['mocha!test/entry'];
+    config.entry.test = ['file?name=test.html!./test/test.html'];
     var testFiles = require('./test');
     for (var i = 0; i < testFiles.length; i++) {
-        config.entry.test.push(testFiles[i]);
+        config.entry.test.push('mocha!'+testFiles[i]);
     }
 } catch (e) {
     // don't add tests if mocha is missing
