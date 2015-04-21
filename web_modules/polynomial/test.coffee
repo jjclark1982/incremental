@@ -167,14 +167,14 @@ describe 'Polynomial', ->
         it 'constant', ->
             p = new Polynomial([2.2])
             value = p.evaluate(5.5, {discrete: true})
-            expect(value).to.equal(2.2)
+            expect(Math.abs(value - 2.2)).to.be.lessThan(0.0000001)
 
         it 'affine', ->
             p = new Polynomial([c, b])
             x = 4.5
             value = p.evaluate(x, {discrete: true})
             expected = c + b*x
-            expect(Math.abs(value-expected)).to.be.lessThan(0.00001)
+            expect(Math.abs(value-expected)).to.be.lessThan(0.0000001)
 
         it 'quadratic', ->
             p = new Polynomial([c,b,a])

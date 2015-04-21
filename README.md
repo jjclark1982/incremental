@@ -119,3 +119,5 @@ we have "discrete + batched" mode for that.
 do we want to differentiate "very discrete" (only complete factories produce anything)
 from "discrete" (factories don't start producing until they are started)?
 what effect does this choice have on translation?
+
+TODO: use more standard finite-differences terminology
