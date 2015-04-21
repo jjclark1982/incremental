@@ -5,9 +5,6 @@ Numeral = require('numeral')
 clockSkew = require('clock-skew')
 clock = require('clock')
 
-require('chart.js')
-LineChart = require('react-chartjs').Line
-
 AccumulatorView = React.createClass({
     displayName: 'AccumulatorView'
 
@@ -16,13 +13,6 @@ AccumulatorView = React.createClass({
             autoSave: true
             accumulator: new Accumulator()
             value: 0
-            chartData: {
-                labels: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-                datasets: [
-                    label: "Value"
-                    data: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-                ]
-            }
         }
 
     componentWillMount: ->
@@ -45,13 +35,6 @@ AccumulatorView = React.createClass({
             t_1 = Date.now() - skew
             t = (t_1 - @accumulator.t_0) / @accumulator.scale
             value = Math.floor(@accumulator.evaluateAtTime(t_1))
-            chartData = @state.chartData
-            @frame ?= 0
-            if @frame++ % 16 is 0
-                chartData.datasets[0].data.shift()
-                chartData.datasets[0].data.push(value)
-                chartData.labels.shift()
-                chartData.labels.push(t_1)
             @setState({
                 accumulator: @accumulator
                 t_1: t_1
@@ -59,20 +42,9 @@ AccumulatorView = React.createClass({
                 value: value
                 rate: @accumulator.rateAtTime(t_1)
                 progress: @accumulator.progressAtTime(t_1)
-                chartData: chartData
                 skew: skew
             })
         )
-
-    # shouldComponentUpdate: (nextProps, nextState)->
-    #     if nextState.value isnt @state.value
-    #         return true
-    #     if nextState.rate isnt @state.rate
-    #         return true
-    #     for k_i, i in nextState.accumulator?.k or []
-    #         if @state.accumulator.k[i] isnt k_i
-    #             return true
-    #     return false
 
     addOne: ->
         @accumulator.add([1])
@@ -160,7 +132,6 @@ AccumulatorView = React.createClass({
                 <label className="pure-checkbox"><input type="checkbox" onChange={@toggleDiscrete} checked={@state.accumulator.discrete} /> discrete</label>{' '}
                 <label className="pure-checkbox"><input type="checkbox" onChange={@toggleBatched} checked={@state.accumulator.batched} /> batched</label>
             </p>
-            <LineChart data={@state.chartData} options={chartOptions} width={600} height={250}/>
         </div>
 })
 
