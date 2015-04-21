@@ -3,34 +3,30 @@ var util = require('./util');
 // Polynomial is an immutable class representing a single-variable polynomial.
 // It is represented as an array of coefficients k[],
 // such that f(x) = k_i * x^i + ... + k_0
-function Polynomial(k_) {
-    var k;
-    if (arguments.length > 1) {
-        // support constructing with a tuple. e.g. Polynomial(2,3)
+function Polynomial(arg) {
+    // support using the constructor to quickly ensure type.
+    // we expect it to be immutable, so don't worry whether we used 'new'.
+    if (arg instanceof Polynomial) {
+        return arg;
+    }
+
+    // support constructing with a scalar or tuple. e.g. Polynomial(2,3)
+    var k = arg;
+    if(Object.prototype.toString.call(k) !== '[object Array]') {
         k = new Array(arguments.length);
         for (var i = 0; i < arguments.length; i++) {
             k[i] = arguments[i];
         }
     }
-    else {
-        k = k_;
-    }
-    // support using the constructor to quickly ensure type.
-    if (k instanceof Polynomial) {
-        return k;
-    }
+
     // support using the constructor without the 'new' keyword.
     if (!(this instanceof Polynomial)) {
         return new Polynomial(k);
     }
-    else {
-        // initialization
-        if(Object.prototype.toString.call(k) !== '[object Array]') {
-            k = [k];
-        }
-        this.k = k;
-        return this;
-    }
+    
+    // initialization
+    this.k = k;
+    return this;
 }
 
 Polynomial.prototype.toJSON = function() {
