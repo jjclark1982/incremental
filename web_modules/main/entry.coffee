@@ -4,6 +4,9 @@ try
     require('file?name=index.html!./index.html')
     require('file?name=CNAME!./CNAME')
     require('./style.css')
+    require('es5-shim/es5-shim')
+    require('es5-shim/es5-sham')
+    require('console-polyfill')
 
 React = require('react')
 App = require('./app')

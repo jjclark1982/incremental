@@ -121,3 +121,7 @@ from "discrete" (factories don't start producing until they are started)?
 what effect does this choice have on translation?
 
 TODO: use more standard finite-differences terminology
+
+"discrete" mode is treating k[n] as the n-th order forward finite difference
+
+"continuous" mode is treating k[n] as the n-th order central finite difference
