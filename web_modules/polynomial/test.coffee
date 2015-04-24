@@ -164,12 +164,12 @@ describe 'Polynomial', ->
             expect(value).to.equal(a + ipart(b + ipart(-9*c + ipart(d)*x)*x)*x)
 
     describe 'should evaluate a discrete formula', ->
-        it 'constant', ->
+        it 'constant (8 figures precision)', ->
             p = new Polynomial([2.2])
             value = p.evaluate(5.5, {discrete: true})
             expect(Math.abs(value - 2.2)).to.be.lessThan(0.0000001)
 
-        it 'affine', ->
+        it 'affine (8 figures precision)', ->
             p = new Polynomial([c, b])
             x = 4.5
             value = p.evaluate(x, {discrete: true})
