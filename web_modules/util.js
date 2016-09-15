@@ -1,7 +1,7 @@
 // A minimal library for "$"-style web applications.
 
-$ = document.getElementById.bind(document);
-$$ = document.querySelectorAll.bind(document);
+var $ = document.getElementById.bind(document);
+var $$ = document.querySelectorAll.bind(document);
 
 function parseQuery(str) {
     var obj = {};

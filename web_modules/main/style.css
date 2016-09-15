@@ -1,4 +1,4 @@
-@import url(purecss/pure.css);
+@import url(../../node_modules/purecss/build/pure.css);
 
 * { box-sizing: border-box; }
 body { padding: 1em; }

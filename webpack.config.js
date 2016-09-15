@@ -1,79 +1,124 @@
-var path = require('path');
 var webpack = require('webpack');
-var autoprefixer = require('autoprefixer-core');
-var atImport = require('postcss-import');
-var cssWring = require('csswring');
+var path = require('path');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var autoprefixer = require('autoprefixer');
+var failPlugin = require('webpack-fail-plugin');
+var CopyPlugin = require('copy-webpack-plugin');
 
 // client environment configuration.
 // (these default values will be overridden by by the current environment)
 
+// default values will be overridden by current environment
+var packageInfo = require('./package');
 var env = {
-    NODE_ENV: 'development'
+    NODE_ENV: 'development',
+    PACKAGE_NAME: packageInfo.name,
+    PACKAGE_VERSION: packageInfo.version
 };
 for (var key in env) {
-    if (typeof process.env[key] !== 'undefined') {
+    if (key in process.env) {
         env[key] = process.env[key];
     }
     env[key] = JSON.stringify(env[key]);
 }
 
-// webpack configuration
+// keep a pointer to css loader so it can change based on environment
+var cssPlugin = new ExtractTextPlugin('[name]-style.css');
+var cssLoader = {
+    test: /\.css$/,
+    loader: cssPlugin.extract("style", "css!postcss")
+}
 
+// main config object
 var config = {
-    context: __dirname,
-    entry: {
-        main: ['main/entry']
-    },
+    devtool: process.env.WEBPACK_DEVTOOL || 'source-map',
+    profile: true,
+    entry: [
+        'main/entry'
+    ],
     output: {
         path: path.join(__dirname, 'public'),
         filename: '[name]-bundle.js'
     },
-    resolveLoader: {
-        modulesDirectories: ['web_modules','node_modules']
+    plugins: [
+        new webpack.DefinePlugin({'process.env': env}),
+        cssPlugin, 
+        failPlugin,
+        new CopyPlugin([{
+            from: 'static'
+        }])
+    ],
+    postcss: function(webpack) {
+        return [
+            autoprefixer({browsers: '> 0.1%'})
+        ]
     },
     resolve: {
-        extensions: ['', '.js', '.cjsx', '.coffee']
+        extensions: ['', '.js', '.jsx', '.cjsx', '.coffee']
     },
     module: {
         loaders: [
-            { test: /\.cjsx$/, loaders: ['react-hot', 'coffee', 'cjsx'] },
-            { test: /\.coffee$/, loader: 'coffee' }
+            cssLoader,
+            {
+                test: /\.jsx?$/,
+                exclude: /(node_modules|bower_components)/,
+                loader: 'babel',
+            },
+            {
+                test: /\.cjsx$/,
+                loaders: ['coffee', 'cjsx']
+            },
+            {
+                test: /\.coffee$/,
+                loader: 'coffee'
+            },
+            {
+                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+                loader: "file"
+            },
+            {
+                test: /\.(woff|woff2)$/,
+                loader: "url",
+                query: {limit: 5000, prefix:"font/"}
+            },
+            {
+                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+                loader: "url",
+                query: {limit: 10000, mimetype:"application/octet-stream", name:"[path][name].[ext]?[hash]"}
+            },
+            {
+                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+                loader: "url",
+                query: {limit: 10000, mimetype:"image/svg+xml", name:"[path][name].[ext]?[hash]"}
+            },
+            {
+                test: /\.gif/,
+                loader: "url",
+                query: {limit: 10000, mimetype:"image/gif", name:"[path][name].[ext]?[hash]"}
+            },
+            {
+                test: /\.jpe?g/,
+                loader: "url",
+                query: {limit: 10000, mimetype:"image/jpg", name:"[path][name].[ext]?[hash]"}
+            },
+            {
+                test: /\.png/,
+                loader: "url",
+                query: {limit: 10000, mimetype:"image/png", name:"[path][name].[ext]?[hash]"}
+            }
         ]
-    },
-    plugins: [
-        new webpack.NoErrorsPlugin(),
-        new webpack.optimize.DedupePlugin(),
-        new webpack.DefinePlugin({'process.env': env})
-    ],
-    postcss: [
-        atImport({path: path.join(__dirname, 'web_modules')}),
-        autoprefixer({browsers: '> 0.1%'})
-    ]
+    }
 };
 
-if (process.env.NODE_ENV === 'production') {
-    // note that the react library will also be optimized due to the DefinePlugin.
-    config.plugins.push(new webpack.optimize.UglifyJsPlugin());
-    config.postcss.push(cssWring);
-    config.plugins.push(new ExtractTextPlugin('[name]-style.css'));
-    config.module.loaders.push({
-        test: /\.css$/,
-        loader: ExtractTextPlugin.extract("style-loader", "css-loader!postcss-loader")
-    });
-}
-else {
-    config.devtool = 'source-map';
-    config.debug = true;
-    config.plugins.push(new ExtractTextPlugin('[name]-style.css'));
-    config.module.loaders.push({
-        test: /\.css$/,
-        loaders: ['style', 'css', 'postcss']
-    });
+config.devServer = {
+    host: process.env.HOST || '127.0.0.1',
+    port: process.env.PORT || '8080',
+    contentBase: config.output.path,
+    publicPath: '/',
+    compress: true
 }
 
 // automatically add all 'test.*' files to the 'test' entrypoint
-
 try {
     require.resolve('mocha');
     config.entry.test = ['file?name=test.html!./test/test.html'];
@@ -85,23 +130,18 @@ try {
     // don't add tests if mocha is missing
 }
 
-// webpack-dev-server configuration
+// in production mode, minimize file-size
+if (process.env.NODE_ENV === 'production') {
+    config.plugins.push(new webpack.optimize.UglifyJsPlugin());
+}
 
-config.devServer = {
-    host: process.env.HOST || 'localhost',
-    port: process.env.PORT || '8080',
-    contentBase: config.output.path,
-    publicPath: '/',
-    hot: true,
-    stats: { colors: true }
-};
+// when running webpack-dev-server, enable hot module reloading
 if (require.cache[require.resolve('webpack-dev-server')]) {
-    // we appear to be running the dev server. enable hot reloading.
-    for (var i in config.entry) {
-        config.entry[i].push('webpack/hot/dev-server');
-        config.entry[i].push('webpack-dev-server/client?http://'+config.devServer.host+':'+config.devServer.port)
-    }
+    config.plugins.push(new webpack.NoErrorsPlugin());
     config.plugins.push(new webpack.HotModuleReplacementPlugin());
+    config.devServer.hot = true;
+    config.devServer.inline = true;
+    cssLoader.loader = "style!css!postcss";
 }
 
 module.exports = config;
