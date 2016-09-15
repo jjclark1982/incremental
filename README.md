@@ -31,6 +31,8 @@ Compiler and server behavior can be controlled through environment variables:
 
 ### TODO
 
+- consider using mathjs, decimaljs, katex
+
 - unified controls for incrementing/decrementing each order of an accumulator's polynomial
 
 - graph of value for each type

@@ -33,12 +33,12 @@ var cssLoader = {
 var config = {
     devtool: process.env.WEBPACK_DEVTOOL || 'source-map',
     profile: true,
-    entry: [
-        'main/entry'
-    ],
+    entry: {
+        main: 'main'
+    },
     output: {
         path: path.join(__dirname, 'public'),
-        filename: '[name]-bundle.js'
+        filename: '[name]-script.js'
     },
     plugins: [
         new webpack.DefinePlugin({'process.env': env}),
@@ -121,7 +121,7 @@ config.devServer = {
 // automatically add all 'test.*' files to the 'test' entrypoint
 try {
     require.resolve('mocha');
-    config.entry.test = ['file?name=test.html!./test/test.html'];
+    config.entry.test = [];
     var testFiles = require('./test');
     for (var i = 0; i < testFiles.length; i++) {
         config.entry.test.push('mocha!'+testFiles[i]);
