@@ -73,38 +73,8 @@ var config = {
                 loader: 'coffee'
             },
             {
-                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-                loader: "file"
-            },
-            {
-                test: /\.(woff|woff2)$/,
-                loader: "url",
-                query: {limit: 5000, prefix:"font/"}
-            },
-            {
-                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-                loader: "url",
-                query: {limit: 10000, mimetype:"application/octet-stream", name:"[path][name].[ext]?[hash]"}
-            },
-            {
-                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-                loader: "url",
-                query: {limit: 10000, mimetype:"image/svg+xml", name:"[path][name].[ext]?[hash]"}
-            },
-            {
-                test: /\.gif/,
-                loader: "url",
-                query: {limit: 10000, mimetype:"image/gif", name:"[path][name].[ext]?[hash]"}
-            },
-            {
-                test: /\.jpe?g/,
-                loader: "url",
-                query: {limit: 10000, mimetype:"image/jpg", name:"[path][name].[ext]?[hash]"}
-            },
-            {
-                test: /\.png/,
-                loader: "url",
-                query: {limit: 10000, mimetype:"image/png", name:"[path][name].[ext]?[hash]"}
+                test: /\.(eot|ttf|woff2?|svg|png|jpe?g)$/,
+                loader: 'file'
             }
         ]
     }
